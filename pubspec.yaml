@@ -40,6 +40,7 @@ dependencies:
   flutter_spinkit: ^5.2.2
   freezed_annotation: ^3.1.0
   json_annotation: ^4.11.0
+  image_picker: ^1.2.1
 
 dev_dependencies:
   flutter_test:
