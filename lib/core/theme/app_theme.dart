@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:han_ppyeom/core/theme/app_text_theme.dart';
+import 'app_color_scheme.dart';
 
-// 다른 페이지는 다른 스타일을 적용하려면,
+// 라이트/다크 모드의 모든 설정(색상, 텍스트, 버튼 스타일, 입력창 디자인 등)을 하나로 합쳐주는 최종 조립소 역할
 class AppTheme {
-  // 테마를 static으로 관리하면 접근성이 좋아짐
   static ThemeData get lightTheme => ThemeData(
     fontFamily: 'Pretendard',
     useMaterial3: true,
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: const Color.fromARGB(255, 255, 161, 9),
-    ),
-    highlightColor: Colors.amber,
-
+    colorScheme: AppColorScheme.lightColorScheme,
     textTheme: AppTextTheme.lightTextTheme,
     inputDecorationTheme: _inputDecoraationTheme(Brightness.light),
     elevatedButtonTheme: _elevatedButtonTheme,
@@ -22,10 +18,7 @@ class AppTheme {
     fontFamily: 'Pretendard',
     useMaterial3: true,
     brightness: Brightness.dark,
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: const Color.fromARGB(255, 255, 161, 9),
-      brightness: Brightness.dark,
-    ),
+    colorScheme: AppColorScheme.darkColorScheme,
     textTheme: AppTextTheme.darkTextTheme,
     inputDecorationTheme: _inputDecoraationTheme(Brightness.dark),
     elevatedButtonTheme: _elevatedButtonTheme,
@@ -34,9 +27,9 @@ class AppTheme {
   static final _elevatedButtonTheme = ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
       foregroundColor: Colors.white,
-      backgroundColor: Colors.orange,
-      minimumSize: Size.fromHeight(56),
-      textStyle: TextStyle(fontSize: 18),
+      backgroundColor: AppColorScheme.lightColorScheme.primary,
+      minimumSize: const Size.fromHeight(56),
+      textStyle: AppTextTheme.lightTextTheme.labelLarge,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
     ),
   );
