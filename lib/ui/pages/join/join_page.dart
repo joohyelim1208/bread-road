@@ -33,6 +33,8 @@ class _JoinPageState extends State<JoinPage> {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
     return GestureDetector(
       onTap: () {
         // 빈 화면 눌렀을 때 키보드 해제
@@ -47,7 +49,7 @@ class _JoinPageState extends State<JoinPage> {
             children: [
               GestureDetector(
                 onTap: () {
-                  // 메서드 만들어서 넘겨주기. 이미지 선택 로직 호출함
+                  // 메서드 만들어서 넘겨주기. 이미지 피커 로직 호출함
                 },
                 child: Center(
                   child: Stack(
@@ -55,8 +57,8 @@ class _JoinPageState extends State<JoinPage> {
                     children: [
                       // 프로필 영역
                       Container(
-                        width: 200,
-                        height: 200,
+                        width: 140,
+                        height: 140,
                         decoration: BoxDecoration(
                           color: Colors.grey[300],
                           shape: BoxShape.circle,
