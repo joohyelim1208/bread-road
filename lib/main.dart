@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:han_ppyeom/core/theme/app_theme.dart';
 import 'package:han_ppyeom/ui/pages/login/login_page.dart';
-import 'package:get/get.dart';
 
 void main() {
   // 리버팟 패키지
@@ -10,12 +9,12 @@ void main() {
   // Get X 컨트롤러
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return GetMaterialApp(
+  Widget build(BuildContext context, WidgetRef ref) {
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
