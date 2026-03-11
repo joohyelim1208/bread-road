@@ -6,7 +6,6 @@ import 'package:han_ppyeom/ui/pages/login/login_page.dart';
 void main() {
   // 리버팟 패키지
   runApp(ProviderScope(child: MyApp()));
-  // Get X 컨트롤러
 }
 
 class MyApp extends ConsumerWidget {

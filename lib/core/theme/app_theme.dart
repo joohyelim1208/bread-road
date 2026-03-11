@@ -63,7 +63,7 @@ class AppTheme {
       contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
       // 텍스트 테마 적용
       helperStyle: texts.labelSmall,
-      errorStyle: texts.labelSmall?.copyWith(color: Colors.red),
+      errorStyle: texts.labelSmall?.copyWith(color: colors.error),
       border: WidgetStateInputBorder.resolveWith((states) {
         print(states);
         // 1. 에러가 포함될 때. 가장 먼저 체크

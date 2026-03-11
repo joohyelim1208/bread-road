@@ -1,17 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:han_ppyeom/core/utils/validator_util.dart';
 
 // 비밀번호도 똑같은 구조 obscureText: true, 비밀번호 가리는 속성
-class NickNameTextFormField extends StatefulWidget {
-  const NickNameTextFormField({super.key, required this.controller});
+class NickNameTextFormField extends ConsumerStatefulWidget {
+  const NickNameTextFormField({
+    super.key,
+    required this.controller,
+    required void Function(value) onChanged,
+  });
 
   final TextEditingController controller;
 
   @override
-  State<NickNameTextFormField> createState() => _NickNameTextFormFieldState();
+  ConsumerState<NickNameTextFormField> createState() =>
+      _NickNameTextFormFieldState();
 }
 
-class _NickNameTextFormFieldState extends State<NickNameTextFormField> {
+class _NickNameTextFormFieldState extends ConsumerState<NickNameTextFormField> {
   int _currentLength = 0;
 
   @override
@@ -52,6 +58,7 @@ class _NickNameTextFormFieldState extends State<NickNameTextFormField> {
           style: textTheme.bodyLarge,
           decoration: InputDecoration(
             hintText: '닉네임을 입력해주세요.',
+
             // 내장 속성 카운터 사용해서 UI 밀림 최소화하기
             helperText: " ",
             helperStyle: textTheme.bodySmall,
@@ -60,6 +67,7 @@ class _NickNameTextFormFieldState extends State<NickNameTextFormField> {
               color: _currentLength > 12
                   ? colorScheme.error
                   : colorScheme.onSurface,
+              height: 2,
             ),
           ),
           validator: ValidatorUtil.validatorNickNameError,

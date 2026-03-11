@@ -1,139 +1,134 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:han_ppyeom/core/theme/theme_provider.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:han_ppyeom/ui/pages/join/join_view_model.dart';
 import 'package:han_ppyeom/ui/widgets/nickname_text_form_field.dart';
 
-class JoinPage extends ConsumerStatefulWidget {
+class JoinPage extends ConsumerWidget {
   const JoinPage({super.key});
 
   @override
-  ConsumerState<JoinPage> createState() => _JoinPageState();
-}
-
-class _JoinPageState extends ConsumerState<JoinPage> {
-  // 선택한 파일을 저장할 변수
-  //File? _image;
-
-  // 이미지피커 패키지 추가
-
-  final _nickNameControllor = TextEditingController();
-  final formkey = GlobalKey<FormState>();
-
-  // 기존 데이터 수정. 서버에서 불러온 닉네임을 미리 채워넣어야 할 때, 값이 변할 때 마다 실시간 로직을 처리해야 할 때(리스너 등록)
-  @override
-  void initState() {
-    super.initState();
-    _nickNameControllor.text = "";
-  }
-
-  @override
-  void dispose() {
-    _nickNameControllor.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // 리버팟 테마 적용. themeData 통째로 가져옴
+  Widget build(BuildContext context, WidgetRef ref) {
+    // 상태를 관찰함
+    final joinState = ref.watch(joinViewModelProvider);
+    // 뷰모델을 참조함
+    final joinViewModel = ref.read(joinViewModelProvider.notifier);
     final theme = ref.watch(themeProvider);
     final textTheme = theme.textTheme;
     final colorScheme = theme.colorScheme;
 
-    return GestureDetector(
-      onTap: () {
-        // 빈 화면 눌렀을 때 키보드 해제
-        FocusScope.of(context).unfocus();
-      },
-      child: Scaffold(
-        backgroundColor: colorScheme.surface,
-        appBar: AppBar(title: Text('프로필 등록하기', style: textTheme.titleLarge)),
-        body: Form(
-          key: formkey,
-          child: ListView(
-            padding: EdgeInsets.symmetric(horizontal: 20),
-            children: [
-              GestureDetector(
-                onTap: () {
-                  // 메서드 만들어서 넘겨주기. 이미지 피커 로직 호출함
-                },
-                child: Center(
-                  child: Stack(
-                    alignment: Alignment.bottomRight,
-                    children: [
-                      // 프로필 영역
-                      Container(
-                        width: 140,
-                        height: 140,
-                        decoration: BoxDecoration(
-                          color: colorScheme.surfaceContainerHighest,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.person,
-                              size: 60,
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                            Text("프로필 사진", style: TextStyle()),
-                          ],
-                        ),
-                      ),
-                      // 스택구조 카메라 아이콘 배치
-                      Container(
-                        padding: EdgeInsets.all(15),
-                        decoration: BoxDecoration(
-                          color: colorScheme.primary,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: colorScheme.surface,
-                            width: 2,
-                          ),
-                        ),
-                        child: Icon(
-                          Icons.camera_alt,
-                          size: 24,
-                          color: colorScheme.onPrimary, // 배경색에 대비되는 색
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+    return Scaffold(
+      backgroundColor: colorScheme.surface,
+      appBar: AppBar(
+        title: Text('프로필 등록하기', style: textTheme.titleLarge),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+      ),
+      body: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        children: [
+          const SizedBox(height: 20),
+          Center(
+            child: GestureDetector(
+              // 이미지 가져오기
+              onTap: () => joinViewModel.pickImage(),
+              child: Stack(
+                alignment: Alignment.bottomLeft,
                 children: [
-                  Text("닉네임", style: textTheme.titleMedium),
-                  SizedBox(height: 10),
-                  // 에러메시지와 카운터는 이 위젯이 알아서 그려줌
-                  NickNameTextFormField(controller: _nickNameControllor),
+                  Container(
+                    width: 140,
+                    height: 140,
+                    decoration: BoxDecoration(
+                      color: colorScheme.surfaceContainerHighest,
+                      shape: BoxShape.circle,
+                      image: joinState.profileImage != null
+                          ? DecorationImage(
+                              image: FileImage(
+                                joinState.profileImage!,
+                              ), // 선택된 이미지가 있으면 표시
+                              fit: BoxFit.cover,
+                            )
+                          : null,
+                    ),
+                    // 만약 이미지가 없다면 기본 아이콘 화면
+                    child: joinState.profileImage == null
+                        ? Icon(
+                            Icons.person,
+                            size: 80,
+                            color: colorScheme.onSurfaceVariant,
+                          )
+                        : null,
+                  ),
+                  // 프로필 등록 카메라 아이콘
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: colorScheme.primary,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 1),
+                    ),
+                    child: Icon(
+                      Icons.camera_alt,
+                      size: 20,
+                      color: Colors.white,
+                    ),
+                  ),
                 ],
               ),
-
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  formkey.currentState?.validate();
-                  print("등록 로직 실행");
-                },
-                child: Text("등록 완료"),
-              ),
-              Container(
-                height: 40,
-                color: Colors.transparent,
-                alignment: Alignment.center,
-                child: Text(
-                  "소셜 로그인 시 더 다양한 기능을 활용하실 수 있습니다.",
-                  style: textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
+            ),
+          ),
+          const SizedBox(height: 40),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start, // 왼쪽 정렬
+            children: [
+              Text("닉네임", style: textTheme.titleMedium),
+              const SizedBox(height: 10),
+              NickNameTextFormField(
+                // 텍스트가 입력이 될 때 마다 뷰모델에게 알려줌. 온체인지드 사용해서 뷰모델에 저장!!
+                onChanged: (value) => joinViewModel.updateNickname(value),
               ),
             ],
           ),
-        ),
+          const SizedBox(height: 40),
+          // 하단 등록하기 버튼
+          SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: ElevatedButton(
+              // 로딩 중이 아닐 때만 버튼이 동작하게 한다.
+              onPressed: joinState.isLoading
+                  ? null
+                  : () => joinViewModel.submit(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary, // 배경색과 대비되는 색상
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                elevation: 0,
+              ),
+              // 로딩 중일 때는 로딩바를, 아닐 때는 등록 완료
+              child: joinState.isLoading
+                  ? SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: colorScheme.onPrimary, // 선택이 되지 않았을 땐 대비색
+                      ),
+                    )
+                  : Text("등록 완료", style: textTheme.labelSmall),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            "소셜 로그인 시 더 다양한 기능을 활용하실 수 있습니다.",
+            textAlign: TextAlign.center,
+            style: textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurfaceVariant, // 배경색 바뀌면 잘 보이게끔
+            ),
+          ),
+        ],
       ),
     );
   }
