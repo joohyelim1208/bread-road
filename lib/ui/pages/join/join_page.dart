@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:han_ppyeom/core/theme/theme_provider.dart';
 import 'package:han_ppyeom/ui/pages/join/join_view_model.dart';
 import 'package:han_ppyeom/ui/widgets/nickname_text_form_field.dart';
@@ -9,6 +10,16 @@ class JoinPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // 고라우터. 홈으로 이동함
+    ref.listen(joinViewModelProvider.select((s) => s.isLoading), (
+      previous,
+      next,
+    ) {
+      //
+      if (previous == true && next == false) {
+        context.go('/home');
+      }
+    });
     // 상태를 관찰함
     final joinState = ref.watch(joinViewModelProvider);
     // 뷰모델을 참조함
