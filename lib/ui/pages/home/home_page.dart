@@ -8,7 +8,10 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       //
       appBar: AppBar(),
-      body: Text('data'),
+      body: Column(children: [
+          
+        ],
+      ),
     );
   }
 }
