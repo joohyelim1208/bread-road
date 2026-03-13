@@ -21,13 +21,25 @@ class HomeViewModel extends Notifier<List<AppTodo>> {
 
   // 즐겨찾기 상태
   void stateFavorite(String id) {
-    state = [];
+    state = [
+      for (final todo in state)
+        if (todo.id == id)
+          todo.copyWith(isFavorite: !todo.isFavorite)
+        else
+          todo,
+    ];
   }
 
   // 완료 상태
   void stateDone(String id) {
-    state = [];
+    state = [
+      for (final todo in state)
+        if (todo.id == id) todo.copyWith(isDone: !todo.isDone) else todo,
+    ];
   }
 }
 
 // 노티파이어프로바이더 정의. 외부에서 사용
+final homeViewModelProvider = NotifierProvider<HomeViewModel, List<AppTodo>>(
+  HomeViewModel.new,
+);

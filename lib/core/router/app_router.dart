@@ -13,7 +13,7 @@ final routerProvider = Provider<GoRouter>((ref) {
   final isLoginId = ref.watch(loginProvider);
 
   return GoRouter(
-    initialLocation: "/join", // 테스트를 위해 우선 조인페이지 설정. 나중에 '/'으로 변경하기.
+    initialLocation: "/", // 테스트를 위한 페이지 설정. 나중에 '/'으로 변경하기.
     // 로그인 여부에 따라. 리다이렉트 로그인 안됐는데 홈으로 가려고 하면 조인페이지로 이동
     redirect: (context, state) {
       final loninApp = state.matchedLocation == "/join";
@@ -30,12 +30,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: "/home",
         name: "home",
-        builder: (context, state) => HomePage(),
+        builder: (context, state) => const HomePage(),
       ),
       GoRoute(
         path: "/join",
         name: "join",
-        builder: (context, state) => JoinPage(),
+        builder: (context, state) => const JoinPage(),
       ),
 
       // 파라미터가 필요한 경로가 있으면 추가. 페이지 이동 시 특정 데이터(ID, 이름, 카테고리 등) 함께 넘겨줘야 될 때

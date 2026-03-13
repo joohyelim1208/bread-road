@@ -29,6 +29,8 @@ class JoinPage extends ConsumerWidget {
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
+      // 화면 키보드 나타날 때 화면크기 줄여서 키보드 위로 올림. 로그인 화면에서는 true
+      resizeToAvoidBottomInset: true,
       backgroundColor: colorScheme.surface,
       appBar: AppBar(
         title: Text('프로필 등록하기', style: textTheme.titleLarge),
