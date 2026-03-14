@@ -1,30 +1,52 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:han_ppyeom/core/theme/theme_provider.dart';
-import 'package:han_ppyeom/ui/pages/join/join_view_model.dart';
 import 'package:han_ppyeom/ui/widgets/nickname_text_form_field.dart';
 
-class JoinPage extends ConsumerWidget {
+class JoinPage extends StatefulWidget {
   const JoinPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // 고라우터. 홈으로 이동함
-    ref.listen(joinViewModelProvider.select((s) => s.isLoading), (
-      previous,
-      next,
-    ) {
-      //
-      if (previous == true && next == false) {
-        context.go('/home');
-      }
-    });
-    // 상태를 관찰함
-    final joinState = ref.watch(joinViewModelProvider);
-    // 뷰모델을 참조함
-    final joinViewModel = ref.read(joinViewModelProvider.notifier);
-    final theme = ref.watch(themeProvider);
+  State<JoinPage> createState() => _JoinPageState();
+}
+
+class _JoinPageState extends State<JoinPage> {
+  // 상태 데이터 직접 선언
+  String _nickname = "";
+  File? _profileImage;
+  bool _isLoading = false;
+
+  // 닉네임 컨트롤러
+  final TextEditingController _nicknameController = TextEditingController();
+
+  // 프로필 이미지(이미지 피커 삭제했으므로 로직 흐름두고, 다시 사용한다면 여기서 수정)
+  Future<void> _pickImage() async {
+    print("이미지 선택 호출");
+  }
+
+  // 등록완료. 메시지도 출력
+  Future<void> _submitNickname() async {
+    if (_nickname.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("닉네임을 입력해주세요.")));
+      return;
+    }
+    // 등록
+    setState(() => _isLoading = true);
+    // 실제 등록 로직(서버통신 할 때 로직 구현)
+    await Future.delayed(const Duration(seconds: 2));
+    // 비동기 API요청 수행 시 요청 완료되기 전 사용자가 화면을 떠나면 (Dispose) context를 더이상 사용할 수 없어서 에러가 발생
+    // 이를 방지하기 위해 if (!mounted) return; 체크를 반드시 해야됨
+    if (mounted) {
+      setState(() => _isLoading = false);
+      // 등록 완료 후 홈화면 스택비우고 이동하기
+      Navigator.pushAndRemoveUntil(context, '/', (route) => false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final textTheme = theme.textTheme;
     final colorScheme = theme.colorScheme;
 
@@ -41,98 +63,14 @@ class JoinPage extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 20),
         children: [
           const SizedBox(height: 20),
-          Center(
-            child: GestureDetector(
-              // 이미지 가져오기
-              onTap: () => joinViewModel.pickImage(),
-              child: Stack(
-                alignment: Alignment.bottomLeft,
-                children: [
-                  Container(
-                    width: 140,
-                    height: 140,
-                    decoration: BoxDecoration(
-                      color: colorScheme.surfaceContainerHighest,
-                      shape: BoxShape.circle,
-                      image: joinState.profileImage != null
-                          ? DecorationImage(
-                              image: FileImage(
-                                joinState.profileImage!,
-                              ), // 선택된 이미지가 있으면 표시
-                              fit: BoxFit.cover,
-                            )
-                          : null,
-                    ),
-                    // 만약 이미지가 없다면 기본 아이콘 화면
-                    child: joinState.profileImage == null
-                        ? Icon(
-                            Icons.person,
-                            size: 80,
-                            color: colorScheme.onSurfaceVariant,
-                          )
-                        : null,
-                  ),
-                  // 프로필 등록 카메라 아이콘
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: colorScheme.primary,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 1),
-                    ),
-                    child: Icon(
-                      Icons.camera_alt,
-                      size: 20,
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+
+          // 프로필이미지 위젯
           const SizedBox(height: 40),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start, // 왼쪽 정렬
-            children: [
-              Text("닉네임", style: textTheme.titleMedium),
-              const SizedBox(height: 10),
-              NickNameTextFormField(
-                // 텍스트가 입력이 될 때 마다 뷰모델에게 알려줌. 온체인지드 사용해서 뷰모델에 저장!!
-                onChanged: (value) => joinViewModel.updateNickname(value),
-              ),
-            ],
-          ),
+
+          // 닉네임 입력 위젯
           const SizedBox(height: 40),
-          // 하단 등록하기 버튼
-          SizedBox(
-            width: double.infinity,
-            height: 56,
-            child: ElevatedButton(
-              // 로딩 중이 아닐 때만 버튼이 동작하게 한다.
-              onPressed: joinState.isLoading
-                  ? null
-                  : () => joinViewModel.submit(),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: colorScheme.primary,
-                foregroundColor: colorScheme.onPrimary, // 배경색과 대비되는 색상
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                elevation: 0,
-              ),
-              // 로딩 중일 때는 로딩바를, 아닐 때는 등록 완료
-              child: joinState.isLoading
-                  ? SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: colorScheme.onPrimary, // 선택이 되지 않았을 땐 대비색
-                      ),
-                    )
-                  : Text("등록 완료", style: textTheme.labelSmall),
-            ),
-          ),
+
+          // 하단 등록하기 버튼 위젯
           const SizedBox(height: 16),
           Text(
             "소셜 로그인 시 더 다양한 기능을 활용하실 수 있습니다.",
@@ -142,6 +80,56 @@ class JoinPage extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  // 이미지 등록 위젯
+  Widget _buildProfileImage(ColorScheme colorScheme) {
+    return Center(
+      child: GestureDetector(
+        onTap: _pickImage,
+        child: Stack(
+          alignment: Alignment.bottomRight,
+          children: [
+            Container(
+              width: 140,
+              height: 140,
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainerHighest,
+                shape: BoxShape.circle,
+                image: _profileImage != null
+                    ? DecorationImage(
+                        image: FileImage(_profileImage!),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
+              ),
+              // 프로필이미지 없을 때
+              child: _profileImage == null
+                  ? Icon(
+                      Icons.person,
+                      size: 80,
+                      color: colorScheme.onSurfaceVariant,
+                    )
+                  : null,
+            ),
+            // 카메라 아이콘
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: colorScheme.primary,
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 1),
+              ),
+              child: const Icon(
+                Icons.camera_alt,
+                size: 20,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

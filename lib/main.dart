@@ -1,26 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:han_ppyeom/core/router/app_router.dart';
 import 'package:han_ppyeom/core/theme/app_theme.dart';
+import 'package:han_ppyeom/ui/pages/home/home_page.dart';
 
 void main() {
-  // 리버팟 패키지
-  runApp(ProviderScope(child: MyApp()));
+  runApp(const MyApp());
 }
 
-class MyApp extends ConsumerWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final router = ref.watch(routerProvider);
-    // 앱에 고라우터 적용
-    return MaterialApp.router(
+  Widget build(BuildContext context) {
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      routerConfig: router,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
+      // 고라우터 대신 홈 속성
+      home: HomePage(),
     );
   }
 }
