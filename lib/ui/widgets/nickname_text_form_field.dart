@@ -6,11 +6,13 @@ class NickNameTextFormField extends StatelessWidget {
   // 부모에게서 필요한 정보를 받아옴
   final String nickname;
   final ValueChanged<String> onChaged;
+  final TextEditingController controller;
 
   const NickNameTextFormField({
     super.key,
     required this.nickname, // 현재 입력 된 닉네임 값
     required this.onChaged,
+    required this.controller,
   });
 
   @override
@@ -25,6 +27,7 @@ class NickNameTextFormField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         TextFormField(
+          controller: controller, // 컨트롤러 연결!
           onChanged: onChaged,
           // 텍스트폼필드 속성. 유저가 입력할 때 마다 즉시 검증을 수행하도록 한다.
           autovalidateMode: AutovalidateMode.onUserInteraction,
