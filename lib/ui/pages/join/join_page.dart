@@ -66,53 +66,62 @@ class _JoinPageState extends State<JoinPage> {
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      // 화면 키보드 나타날 때 화면크기 줄여서 키보드 위로 올림. 로그인 화면에서는 true
       resizeToAvoidBottomInset: true,
       backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        title: Text('프로필 등록하기', style: textTheme.titleLarge),
+        title: Text(
+          '프로필 등록하기',
+          style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
         elevation: 0,
         backgroundColor: Colors.transparent,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new, size: 20),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: GestureDetector(
-        // 화면 밖 터치 시 키보드 숨김
         onTap: () => FocusScope.of(context).unfocus(),
-        child: ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          children: [
-            const SizedBox(height: 20),
-            // 프로필이미지 위젯
-            _buildProfileImage(colorScheme),
-            const SizedBox(height: 40),
-            // 닉네임 입력 위젯. 자식에게서 컨트롤러 전달받음
-            NickNameTextFormField(
-              nickname: _nickname,
-              controller: _nicknameController,
-              onChaged: (value) {
-                setState(() {
-                  _nickname = value; // 입력할 때 마다 상태를 업데이트 글자수 즉시 변경
-                });
-              },
-            ),
-            const SizedBox(height: 40),
-            // 하단 등록하기 버튼 위젯
-            _buildInputButton(colorScheme, textTheme),
-            const SizedBox(height: 16),
-
-            Text(
-              "소셜 로그인 시 더 다양한 기능을 활용하실 수 있습니다.",
-              textAlign: TextAlign.center,
-              style: textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant, // 배경색 바뀌면 잘 보이게끔
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            children: [
+              const SizedBox(height: 40),
+              // 프로필이미지 위젯
+              _buildProfileImage(colorScheme),
+              const SizedBox(height: 48),
+              // 닉네임 입력 위젯
+              NickNameTextFormField(
+                nickname: _nickname,
+                controller: _nicknameController,
+                onChaged: (value) {
+                  setState(() {
+                    _nickname = value;
+                  });
+                },
               ),
-            ),
-          ],
+              const SizedBox(height: 10),
+              // 하단 등록하기 버튼 위젯
+              _buildInputButton(colorScheme, textTheme),
+              const SizedBox(height: 20),
+              Text(
+                "로그인 정보를 잊으셨나요?\n소셜 로그인 시 더 다양한 기능을 활용하실 수 있습니다.",
+                textAlign: TextAlign.center,
+                style: textTheme.bodySmall?.copyWith(
+                  color: Colors.grey[500],
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 40),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  // 이미지 등록 위젯
+  // 프로필이미지 위젯
   Widget _buildProfileImage(ColorScheme colorScheme) {
     return Center(
       child: GestureDetector(
@@ -124,8 +133,16 @@ class _JoinPageState extends State<JoinPage> {
               width: 140,
               height: 140,
               decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest,
+                color: Colors.grey[100],
                 shape: BoxShape.circle,
+                border: Border.all(color: Colors.grey[200]!, width: 2),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withAlpha(10),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
                 image: _profileImage != null
                     ? DecorationImage(
                         image: FileImage(_profileImage!),
@@ -133,26 +150,31 @@ class _JoinPageState extends State<JoinPage> {
                       )
                     : null,
               ),
-              // 프로필이미지 없을 때
               child: _profileImage == null
                   ? Icon(
-                      Icons.person,
-                      size: 80,
-                      color: colorScheme.onSurfaceVariant,
+                      Icons.person_outline,
+                      size: 70,
+                      color: Colors.grey[400],
                     )
                   : null,
             ),
-            // 카메라 아이콘
             Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: colorScheme.primary,
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 1),
+                border: Border.all(color: Colors.white, width: 2),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withAlpha(10),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: const Icon(
                 Icons.camera_alt,
-                size: 20,
+                size: 18,
                 color: Colors.white,
               ),
             ),
@@ -162,7 +184,6 @@ class _JoinPageState extends State<JoinPage> {
     );
   }
 
-  // 버튼 등록 위젯
   Widget _buildInputButton(ColorScheme colorScheme, TextTheme textTheme) {
     return SizedBox(
       width: double.infinity,
@@ -172,12 +193,13 @@ class _JoinPageState extends State<JoinPage> {
         style: ElevatedButton.styleFrom(
           backgroundColor: colorScheme.primary,
           foregroundColor: colorScheme.onPrimary,
+          elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(16),
           ),
         ),
         child: _isLoading
-            ? SizedBox(
+            ? const SizedBox(
                 width: 24,
                 height: 24,
                 child: CircularProgressIndicator(
@@ -185,7 +207,10 @@ class _JoinPageState extends State<JoinPage> {
                   color: Colors.white,
                 ),
               )
-            : Text("등록완료", style: TextStyle(fontWeight: FontWeight.bold)),
+            : const Text(
+                "등록완료",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
       ),
     );
   }

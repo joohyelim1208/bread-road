@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:han_ppyeom/core/theme/app_theme.dart';
 import 'package:han_ppyeom/ui/pages/home/home_page.dart';
-import 'package:han_ppyeom/ui/pages/join/join_page.dart';
+import 'package:han_ppyeom/ui/pages/login/login_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,8 +17,13 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
-      // 고라우터 대신 홈 속성
-      home: JoinPage(),
+      // 초기화면 설정(로그인이 안된거면 로그인페이지)
+      initialRoute: '/login',
+      // 고라우터 삭제. 라우트 경로
+      routes: {
+        '/': (context) => const HomePage(),
+        '/login': (context) => const LoginPage(),
+      },
     );
   }
 }
