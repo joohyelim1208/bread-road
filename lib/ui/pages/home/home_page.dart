@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:han_ppyeom/ui/pages/write/write_page.dart';
 import 'package:han_ppyeom/ui/widgets/bottom_navigation_bar.dart';
 
 class HomePage extends StatefulWidget {
@@ -14,12 +14,25 @@ class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
   final PageController _pageController = PageController();
 
+  // 최근 기록 임시 데이터
+  final List<Map<String, dynamic>> _recentRecords = [
+    {
+      "name": "바게트 샌드위치",
+      "bakery": "건강한 빵집",
+      "rating": "4.2",
+      "isFavorite": false,
+    },
+    {"name": "크로와상", "bakery": "빵빵한 빵집", "rating": "4.5", "isFavorite": false},
+    {"name": "치아바타", "bakery": "숲속 베이커리", "rating": "4.8", "isFavorite": false},
+  ];
+
   @override
   void dispose() {
     _pageController.dispose();
     super.dispose();
   }
 
+  // 손가락 터치시에도 화면 직접 밀면 바텀바 아이콘 바뀜
   void _onPageChanged(int index) {
     setState(() {
       _currentIndex = index;
@@ -43,9 +56,10 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
-      // 화면이 미끄러지듯 전환되게 만드는 위젯 PageView
+      // 화면이 미끄러지듯 전환되게 만드는 위젯 PageView. 아직 해당 페이지 구현 전이라 연결안함
       body: PageView(
         controller: _pageController,
+        // 손가락 터치 시에도 화면전환
         onPageChanged: _onPageChanged,
         children: [
           _buildHomeView(textTheme, colorScheme),
@@ -80,8 +94,45 @@ class _HomePageState extends State<HomePage> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+                // writePage로 이동
                 IconButton(
-                  onPressed: () {},
+                  onPressed: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const WritePage(),
+                      ),
+                    );
+
+                    // 돌아왔을 때 데이터 추가 및 화면 갱신
+                    if (result != null) {
+                      setState(() {
+                        // 클릭 시 결과가 인덱스 숫자인 경우
+                        if (result is int) {
+                          _onItemTapped(result);
+                          return;
+                        }
+
+                        if (result is Map<String, dynamic>) {
+                          // 새로 작성 시에는 삭제 버튼을 누를 일이 없음! Map 데이터만 처리
+                          if (result["isDeleted"] != true) {
+                            _recentRecords.insert(0, {
+                              "name": result["name"] as String,
+                              "bakery": result["bakery"] as String,
+                              "rating": result["rating"] as String,
+                              "isFavorite":
+                                  result["isFavorite"] as bool? ?? false,
+                            });
+
+                            // 보여지는 리스트는 최대 3개까지만 유지함
+                            if (_recentRecords.length > 3) {
+                              _recentRecords.removeLast();
+                            }
+                          }
+                        }
+                      });
+                    }
+                  },
                   icon: const Icon(Icons.add_circle, size: 32),
                   color: colorScheme.primary,
                 ),
@@ -97,11 +148,26 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(height: 10),
             _buildTodayBreadCard(textTheme, colorScheme),
             const SizedBox(height: 40),
-            Text(
-              "최근 기록",
-              style: textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "최근 기록",
+                  style: textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => _onItemTapped(2), // '내 기록' 탭으로 이동
+                  child: Text(
+                    "+ 더보기",
+                    style: textTheme.bodySmall?.copyWith(
+                      color: Colors.grey[600],
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 10),
             _buildRecentRecordsList(textTheme),
@@ -150,8 +216,24 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // 오늘의 빵 기록 카드
+  // 오늘의 빵 기록 카드섹션
   Widget _buildTodayBreadCard(TextTheme textTheme, ColorScheme colorScheme) {
+    // 최신 기록이 있으면 해당 데이터를 사용, 없으면 기본값 표시
+    final latestRecord = _recentRecords.isNotEmpty
+        ? _recentRecords.first
+        : {
+            "name": "오늘의 빵",
+            "bakery": "비어있음",
+            "rating": "0.0",
+            "isFavorite": false,
+          };
+
+    final String name = latestRecord["name"] ?? "오늘의 빵";
+    final String bakery = latestRecord["bakery"] ?? "비어있음";
+    final double rating =
+        double.tryParse(latestRecord["rating"].toString()) ?? 0.0;
+    final bool isFavorite = latestRecord["isFavorite"] == true;
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -183,37 +265,73 @@ class _HomePageState extends State<HomePage> {
           ),
           Padding(
             padding: const EdgeInsets.all(20),
-            child: Column(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "소금빵",
-                      style: textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
+                // 좌측: 이름과 가게명
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    // 별점 기능
+                      const SizedBox(height: 8),
+                      Text(
+                        bakery,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: textTheme.titleMedium?.copyWith(
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 16),
+                // 우측: 별점과 즐겨찾기 (아이콘 우측 정렬)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    // 별점
                     Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: List.generate(
                         5,
                         (index) => Icon(
                           Icons.star,
-                          size: 20,
-                          color: index < 4 ? Colors.amber : Colors.grey[300],
+                          size: 18,
+                          color: index < rating.floor()
+                              ? Colors.amber
+                              : Colors.grey[300],
                         ),
                       ),
                     ),
+                    const SizedBox(height: 4),
+                    // 하트 아이콘 (즐겨찾기 토글)
+                    IconButton(
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      onPressed: () {
+                        if (_recentRecords.isNotEmpty) {
+                          setState(() {
+                            _recentRecords[0]["isFavorite"] = !isFavorite;
+                          });
+                        }
+                      },
+                      icon: Icon(
+                        isFavorite ? Icons.favorite : Icons.favorite_border,
+                        color: isFavorite ? Colors.red : Colors.grey,
+                        size: 24,
+                      ),
+                    ),
                   ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "아티장 베이커리",
-                  style: textTheme.titleMedium?.copyWith(
-                    color: Colors.grey[600],
-                  ),
                 ),
               ],
             ),
@@ -226,9 +344,9 @@ class _HomePageState extends State<HomePage> {
   // 최근 기록 리스트. 별점 설정 시 값 반영하기
   Widget _buildRecentRecordsList(TextTheme textTheme) {
     return Column(
-      children: List.generate(
-        3,
-        (index) => Padding(
+      children: List.generate(_recentRecords.length, (index) {
+        final record = _recentRecords[index];
+        return Padding(
           padding: const EdgeInsets.only(bottom: 12),
           child: Container(
             padding: const EdgeInsets.all(12),
@@ -253,14 +371,14 @@ class _HomePageState extends State<HomePage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "바게트 샌드위치",
+                        record["name"] ?? "",
                         style: textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        "건강한 빵집  ⭐ 4.2",
+                        "${record["bakery"]}  ⭐ ${record["rating"]}",
                         style: textTheme.bodySmall?.copyWith(
                           color: Colors.grey[600],
                         ),
@@ -268,12 +386,42 @@ class _HomePageState extends State<HomePage> {
                     ],
                   ),
                 ),
-                const Icon(Icons.chevron_right, color: Colors.grey),
+                IconButton(
+                  onPressed: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => WritePage(initialData: record),
+                      ),
+                    );
+
+                    if (result != null) {
+                      setState(() {
+                        if (result is Map<String, dynamic>) {
+                          if (result["isDeleted"] == true) {
+                            // 삭제 처리
+                            _recentRecords.removeAt(index);
+                          } else {
+                            // 수정 처리
+                            _recentRecords[index] = {
+                              "name": result["name"] as String,
+                              "bakery": result["bakery"] as String,
+                              "rating": result["rating"] as String,
+                              "isFavorite":
+                                  result["isFavorite"] as bool? ?? false,
+                            };
+                          }
+                        }
+                      });
+                    }
+                  },
+                  icon: const Icon(Icons.chevron_right, color: Colors.grey),
+                ),
               ],
             ),
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 
