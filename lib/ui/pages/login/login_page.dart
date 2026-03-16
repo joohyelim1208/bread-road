@@ -35,9 +35,18 @@ class LoginPage extends StatelessWidget {
               ),
               const SizedBox(height: 32),
               Text(
-                '빵친자',
+                '한 뼘',
                 textAlign: TextAlign.center,
                 style: textTheme.headlineLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  height: 1.4,
+                  color: colorScheme.onSurface,
+                ),
+              ),
+              Text(
+                '한 걸음씩 찾아가는 나만의 빵 취향',
+                textAlign: TextAlign.center,
+                style: textTheme.bodyLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                   height: 1.4,
                   color: colorScheme.onSurface,
