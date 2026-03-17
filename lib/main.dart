@@ -1,26 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:han_ppyeom/core/router/app_router.dart';
-import 'package:han_ppyeom/core/theme/app_theme.dart';
+import 'package:bread_road/core/theme/app_theme.dart';
+import 'package:bread_road/ui/pages/home/home_page.dart';
+import 'package:bread_road/ui/pages/login/login_page.dart';
 
 void main() {
-  // 리버팟 패키지
-  runApp(ProviderScope(child: MyApp()));
+  runApp(const MyApp());
 }
 
-class MyApp extends ConsumerWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final router = ref.watch(routerProvider);
-    // 앱에 고라우터 적용
-    return MaterialApp.router(
+  Widget build(BuildContext context) {
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      routerConfig: router,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
+      // 초기화면 설정(로그인이 안된거면 로그인페이지)
+      initialRoute: '/login',
+      // 고라우터 삭제. 라우트 경로
+      routes: {
+        '/': (context) => const HomePage(),
+        '/login': (context) => const LoginPage(),
+      },
     );
   }
 }

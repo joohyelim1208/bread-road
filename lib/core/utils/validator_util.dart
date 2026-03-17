@@ -21,5 +21,16 @@ class ValidatorUtil {
     return "$current / $max";
   }
 
+  // 제품명 유효성 검사 (30자 제한)
+  static String? validatorBreadNameError(String? text) {
+    if (text == null || text.trim().isEmpty) {
+      return "제품명을 입력해주세요.";
+    }
+    if (text.length > 30) {
+      return "제품명은 30글자 이하만 가능합니다.";
+    }
+    return null;
+  }
+
   // 비밀번호도 필요 시 validatorPassword
 }

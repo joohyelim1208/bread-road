@@ -1,30 +1,34 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:han_ppyeom/core/utils/validator_util.dart';
-import 'package:han_ppyeom/ui/pages/join/join_view_model.dart';
+import 'package:bread_road/core/utils/validator_util.dart';
 
 // 비밀번호도 똑같은 구조 obscureText: true, 비밀번호 가리는 속성
-class NickNameTextFormField extends ConsumerWidget {
-  // 컨트롤러 삭제 후 온체인지드 콜백을 받음
-  final ValueChanged<String> onChanged;
+class NickNameTextFormField extends StatelessWidget {
+  // 부모에게서 필요한 정보를 받아옴
+  final String nickname;
+  final ValueChanged<String> onChaged;
+  final TextEditingController controller;
 
-  const NickNameTextFormField({super.key, required this.onChanged});
+  const NickNameTextFormField({
+    super.key,
+    required this.nickname, // 현재 입력 된 닉네임 값
+    required this.onChaged,
+    required this.controller,
+  });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // 뷰모델에서 현재 닉네임의 상태를 가지고 오기!
-    final nickname = ref.watch(joinViewModelProvider).nickname;
-    final currentLength = nickname.length;
-    // 테마데이터 가져오기. joinPage에서 ref.watch로 최신으로 반영되는 테마가 전달됨
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
+
+    final currentLength = nickname.length;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         TextFormField(
-          onChanged: onChanged,
+          controller: controller, // 컨트롤러 연결!
+          onChanged: onChaged,
           // 텍스트폼필드 속성. 유저가 입력할 때 마다 즉시 검증을 수행하도록 한다.
           autovalidateMode: AutovalidateMode.onUserInteraction,
           style: textTheme.bodyLarge,
@@ -42,6 +46,7 @@ class NickNameTextFormField extends ConsumerWidget {
               height: 2,
             ),
           ),
+          // 기본 유효성 검사
           validator: (value) => ValidatorUtil.validatorNickNameError(value),
         ),
       ],

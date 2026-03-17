@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:han_ppyeom/core/theme/app_text_theme.dart';
+import 'package:bread_road/core/theme/app_text_theme.dart';
 import 'app_color_scheme.dart';
 
 // 라이트/다크 모드의 모든 설정(색상, 텍스트, 버튼 스타일, 입력창 디자인 등)을 하나로 합쳐주는 최종 조립소 역할
