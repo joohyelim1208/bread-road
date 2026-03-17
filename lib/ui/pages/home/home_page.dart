@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:han_ppyeom/ui/pages/write/write_page.dart';
-import 'package:han_ppyeom/ui/widgets/bottom_navigation_bar.dart';
+import 'package:bread_road/ui/pages/write/write_page.dart';
+import 'package:bread_road/ui/widgets/bottom_navigation_bar.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

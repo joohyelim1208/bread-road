@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:han_ppyeom/ui/widgets/nickname_text_form_field.dart';
+import 'package:bread_road/ui/widgets/nickname_text_form_field.dart';
 
 class JoinPage extends StatefulWidget {
   const JoinPage({super.key});

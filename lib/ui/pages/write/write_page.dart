@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:han_ppyeom/core/utils/validator_util.dart';
-import 'package:han_ppyeom/ui/pages/write/widgets/app_bar_widget.dart';
-import 'package:han_ppyeom/ui/widgets/bottom_navigation_bar.dart';
+import 'package:bread_road/core/utils/validator_util.dart';
+import 'package:bread_road/ui/pages/write/widgets/app_bar_widget.dart';
+import 'package:bread_road/ui/widgets/bottom_navigation_bar.dart';
 
 class WritePage extends StatefulWidget {
   final Map<String, dynamic>? initialData;

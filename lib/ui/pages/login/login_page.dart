@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:han_ppyeom/ui/pages/join/join_page.dart';
+import 'package:bread_road/ui/pages/join/join_page.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});

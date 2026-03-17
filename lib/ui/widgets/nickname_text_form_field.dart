@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:han_ppyeom/core/utils/validator_util.dart';
+import 'package:bread_road/core/utils/validator_util.dart';
 
 // 비밀번호도 똑같은 구조 obscureText: true, 비밀번호 가리는 속성
 class NickNameTextFormField extends StatelessWidget {

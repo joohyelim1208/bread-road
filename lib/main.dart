@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:han_ppyeom/core/theme/app_theme.dart';
-import 'package:han_ppyeom/ui/pages/home/home_page.dart';
-import 'package:han_ppyeom/ui/pages/login/login_page.dart';
+import 'package:bread_road/core/theme/app_theme.dart';
+import 'package:bread_road/ui/pages/home/home_page.dart';
+import 'package:bread_road/ui/pages/login/login_page.dart';
 
 void main() {
   runApp(const MyApp());
