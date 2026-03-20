@@ -1,4 +1,5 @@
 import 'package:bread_road/core/enum/write_category_type.dart';
+import 'package:bread_road/core/utils/input_decoration_util.dart';
 import 'package:bread_road/ui/widgets/app_bar_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:bread_road/core/utils/validator_util.dart';
@@ -91,13 +92,13 @@ class _WritePageState extends State<WritePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 12),
                     // 1. 빵류 / 과자류 선택 영역
-                    _buildCategorySelector(colorScheme, textTheme),
-                    const SizedBox(height: 32),
+                    _buildTypeSelector(colorScheme, textTheme),
+                    const SizedBox(height: 12),
                     // 2. 사진 추가 영역
                     _buildImagePickerArea(colorScheme, textTheme),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 12),
                     // 3. 내가 먹은 빵 (제품명) 입력 필드 영역
                     Text(
                       "제품명",
@@ -110,22 +111,18 @@ class _WritePageState extends State<WritePage> {
                       controller: _nameController,
                       onChanged: (value) => setState(() => _breadName = value),
                       maxLength: 30,
-                      decoration: InputDecoration(
+                      decoration: InputDecorationUtil.commonDecoration(
+                        context: context, // 현재의 유틸 테마를 불러옴
                         hintText: '제품명을 입력해주세요.',
                         counterText: "${_breadName.length} / 30",
-                        counterStyle: TextStyle(
-                          color: _breadName.length > 30
-                              ? Colors.red
-                              : Colors.grey,
-                        ),
                       ),
                       validator: ValidatorUtil.validatorBreadNameError,
                     ),
 
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                     // 4. 카테고리 선택 (가로 스크롤)
                     _buildCategorySelector(colorScheme, textTheme),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
 
                     Text(
                       "자세한 설명",
@@ -136,37 +133,35 @@ class _WritePageState extends State<WritePage> {
                     // 5. 가게명 입력 필드 영역. 하단에 위치표시 시군구
                     _buildBakeryNameField(colorScheme, textTheme),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 12),
 
                     // 6. 가격 추가 영역
-                    const SizedBox(height: 24),
-
-                    // 7. 시식여부 선택 영역. isDone
-                    const SizedBox(height: 24),
-                    // 8. 맛, 풍미, 향 식감 선택영역. 하나의 카드섹션으로 나눠야 하는지?
-
-                    // 9. 별점 기능 영역
-                    _buildRatingBar(colorScheme, textTheme),
-                    const SizedBox(height: 32),
-                    // 10. 글쓰기 (내용)
-                    Text(
-                      "글쓰기",
-                      style: textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
                     const SizedBox(height: 12),
+
+                    // 7. 방문날짜 선택 영역
+                    const SizedBox(height: 12),
+                    // 8. 시식여부 선택 영역. isDone
+                    const SizedBox(height: 12),
+                    // 9. 맛, 풍미, 향 식감 선택영역. 하나의 카드섹션으로 나눠야 하는지?
+
+                    // 10. 별점 기능 영역
+                    _buildRatingBar(colorScheme, textTheme),
+                    const SizedBox(height: 12),
+                    // 11. 글쓰기 (내용) 입력창 높이 고정하고 내부에서 스크롤되게 하기
                     TextFormField(
                       controller: _contentController,
-                      maxLines: 100,
-                      decoration: const InputDecoration(
+                      minLines: 6,
+                      maxLines: 6,
+                      // 여러줄 입력
+                      keyboardType: TextInputType.multiline,
+                      decoration: InputDecorationUtil.commonDecoration(
+                        context: context,
                         hintText: '내용을 입력해주세요.',
-                        alignLabelWithHint: true,
                       ),
                     ),
 
-                    const SizedBox(height: 48),
-                    // 11. 저장하기 버튼
+                    const SizedBox(height: 12),
+                    // 12. 저장하기 버튼
                     SizedBox(
                       width: double.infinity,
                       height: 56,
@@ -192,7 +187,7 @@ class _WritePageState extends State<WritePage> {
                           backgroundColor: colorScheme.primary,
                           foregroundColor: colorScheme.onPrimary,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(5),
                           ),
                         ),
                         child: const Text(
@@ -222,40 +217,57 @@ class _WritePageState extends State<WritePage> {
     );
   }
 
-  // 1. 빵류 / 과자류 선택 영역 위젯
+  // 1. 빵류 / 과자류 선택 영역 위젯(대분류)
   Widget _buildTypeSelector(ColorScheme colorScheme, TextTheme textTheme) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _typeButton("빵류", WriteCategoryType.bread), // 텍스트테마 적용
+        _mainTypeButton(
+          "빵류",
+          WriteCategoryType.bread,
+          textTheme,
+          colorScheme,
+        ), // 텍스트테마 적용
         const SizedBox(width: 12),
-        _typeButton("과자류", WriteCategoryType.snack),
+        _mainTypeButton("과자류", WriteCategoryType.snack, textTheme, colorScheme),
       ],
     );
   }
 
-  Widget _typeButton(String label, WriteCategoryType type) {
+  Widget _mainTypeButton(
+    String label,
+    WriteCategoryType type,
+    TextTheme textTheme,
+    ColorScheme colorScheme,
+  ) {
     // 선택값 담아주기. 상단 버튼을 누르면 하단 리스트뷰의 리스트 자체가 바뀜!
     final isSelected = _currentType == type;
-    final textTheme = Theme.of(context).textTheme;
-    final colorScheme = Theme.of(context).colorScheme;
 
-    return GestureDetector(
-      onTap: () => setState(() {
-        _currentType = type;
-        _selectedCategory = "전체"; // 전체로 초기화 해주는 것이 중요!! 과자류에 없는 식사빵 선택 오류 방지
-      }),
-      child: Text(
-        label,
-        style: isSelected
-            ? textTheme.labelMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: colorScheme.primary,
-              )
-            : textTheme.labelMedium?.copyWith(
-                fontWeight: FontWeight.normal,
-                color: Colors.grey,
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() {
+          _currentType = type;
+          _selectedCategory = "전체"; // 전체로 초기화 해주는 것이 중요!! 과자류에 없는 식사빵 선택 오류 방지
+        }),
+        child: Container(
+          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: isSelected ? colorScheme.primary : Colors.grey[300]!,
+                width: 3,
               ),
+            ),
+          ),
+          child: Text(
+            label,
+            style: textTheme.titleLarge?.copyWith(
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              color: isSelected ? colorScheme.primary : Colors.grey[500],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -267,13 +279,13 @@ class _WritePageState extends State<WritePage> {
         // 이미지 피커 호출 (나중에 추가)
         print("이미지 추가 클릭");
       },
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(5),
       child: Container(
         width: double.infinity,
         height: 200,
         decoration: BoxDecoration(
           color: Colors.grey[50],
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(5),
           border: Border.all(color: Colors.grey[200]!, width: 2),
         ),
         child: Column(
@@ -296,6 +308,7 @@ class _WritePageState extends State<WritePage> {
 
   // 4. 카테고리 선택 위젯. 내정보에서도 변경 가능하고, 프로필 등록 후 셀렉트 페이지에서도 먼저 설정하고 들어올 수 있음!
   // 빵류 / 과자류 분기처리
+  // (우측으로 스와이핑 한 경우 오른쪽으로 밀리고 제자리로 돌아가지 않는 문제)
   Widget _buildCategorySelector(ColorScheme colorScheme, TextTheme textTheme) {
     return SizedBox(
       height: 44,
@@ -361,39 +374,54 @@ class _WritePageState extends State<WritePage> {
   }
   // 6. 가격 추가 영역 위젯
 
-  // 7. 시식여부 선택영역 위젯
+  // 7. 방문날짜 선택영역 위젯
 
-  // 8. 맛, 풍미, 향, 식김 선택영역 위젯
+  // 8. 시식여부 선택영역 위젯
 
-  // 9. 별점 위젯. 별점 옆에 '총점0.0' 실시간 반영하기
+  // 9. 맛, 풍미, 향, 식김 선택영역 위젯
+
+  // 10. 별점 위젯. 별점 옆에 '총점0.0' 실시간 반영하기
   Widget _buildRatingBar(ColorScheme colorScheme, TextTheme textTheme) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: List.generate(5, (index) {
-            return GestureDetector(
-              onTap: () {
-                setState(() {
-                  _rating = index + 1.0;
-                });
-              },
-              child: Icon(
-                index < _rating ? Icons.star : Icons.star_border,
-                color: index < _rating ? Colors.amber : Colors.grey[300],
-                size: 32,
-              ),
-            );
-          }),
-        ),
-        // 실시간 총점표시
         Text(
-          "총점 ${_rating.toStringAsFixed(1)}",
-          style: textTheme.labelSmall?.copyWith(
-            fontWeight: FontWeight.normal,
-            color: Colors.grey,
-          ),
+          "종합평가",
+          style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 6),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.end, // 하단정렬
+          children: [
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: List.generate(5, (index) {
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _rating = index + 1.0;
+                    });
+                  },
+                  child: Icon(
+                    index < _rating ? Icons.star : Icons.star_border,
+                    color: index < _rating ? Colors.amber : Colors.grey[300],
+                    size: 32,
+                  ),
+                );
+              }),
+            ),
+            const SizedBox(width: 12),
+            // 실시간 총점표시
+            Text(
+              // double타입인 레이팅을 소수점 첫재짜리까지만 표기하기
+              "총점 ${_rating.toStringAsFixed(1)}",
+              style: textTheme.labelSmall?.copyWith(
+                fontWeight: FontWeight.normal,
+                color: Colors.grey,
+              ),
+            ),
+          ],
         ),
       ],
     );
