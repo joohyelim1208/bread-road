@@ -42,6 +42,25 @@ class _WritePageState extends State<WritePage> {
   final Set<String> _selectedScents = {};
   final Set<String> _selectedTextures = {};
 
+  // 7번. 방문날짜 캘린더피커. 기본값 오늘날짜
+  DateTime _selectedDate = DateTime.now();
+
+  // 날짜 선택 팝업 함수
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2010), // 선택가능한 가장 과거 날짜
+      lastDate: DateTime.now(), // 오늘 이후 날짜는 선택 불가
+      // 한국어 설정 시 showDatePicker 옵션으로 버튼 텍스트 직접 지정가능.
+    );
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -107,14 +126,14 @@ class _WritePageState extends State<WritePage> {
                     _buildTypeSelector(colorScheme, textTheme),
                     const SizedBox(height: 12),
 
-                    // 4. 카테고리 선택 (가로 스크롤)
+                    // 2. 카테고리 선택 (가로 스크롤)
                     _buildCategorySelector(colorScheme, textTheme),
                     const SizedBox(height: 12),
 
-                    // 2. 사진 추가 영역 (비활성화)
+                    // 3. 사진 추가 영역 (비활성화)
                     const SizedBox(height: 12),
 
-                    // 3. 내가 먹은 빵 (제품명) 입력 필드 영역
+                    // 4. 내가 먹은 빵 (제품명) 입력 필드 영역
                     Text(
                       "제품명",
                       style: textTheme.titleMedium?.copyWith(
@@ -179,7 +198,7 @@ class _WritePageState extends State<WritePage> {
                     ),
 
                     const SizedBox(height: 12),
-                    // 12. 저장하기 버튼
+                    // 12. 저장하기 버튼. 꼭 잊지말고 다음페이지로 넘길 데이터 맵에 날짜정보 추가해주기!
                     SizedBox(
                       width: double.infinity,
                       height: 56,
@@ -203,6 +222,10 @@ class _WritePageState extends State<WritePage> {
                             "flavor": _selectedFlavor,
                             "scents": _selectedScents.toList(),
                             "textures": _selectedTextures.toList(),
+                            // 저장하기의 맵에서는 요일정보없이 이 형식으로만 저장하는게 나중에 데이터 정렬하거나 계산 시 훨씬 더 편리하다.
+                            "visitDate": DateFormat(
+                              'yyyy-MM-dd',
+                            ).format(_selectedDate),
                           };
                           Navigator.pop(context, recordData);
                         },
@@ -288,7 +311,7 @@ class _WritePageState extends State<WritePage> {
     );
   }
 
-  // 4. 카테고리 선택 위젯
+  // 2. 카테고리 선택 위젯
   Widget _buildCategorySelector(ColorScheme colorScheme, TextTheme textTheme) {
     return SizedBox(
       height: 44,
@@ -409,11 +432,42 @@ class _WritePageState extends State<WritePage> {
     );
   }
 
-  // 7. 방문날짜 선택영역 위젯 (타이틀만)
+  // 7. 방문날짜 선택영역 위젯 (캘린더 피커 )
   Widget _buildVisitDateTitle(TextTheme textTheme) {
-    return Text(
-      "방문날짜",
-      style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "방문날짜",
+          style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 12),
+        InkWell(
+          // 위에 선언한 변수말고 함수를 호출하기!
+          onTap: () => _selectDate(context),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(5),
+              border: Border.all(color: Colors.grey[400]!, width: 5),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  DateFormat(
+                    'yyyy년 MM월 dd일 (E)',
+                    'ko_KR',
+                  ).format(_selectedDate),
+                  style: textTheme.bodyLarge,
+                ),
+                const Icon(Icons.calendar_today, size: 20, color: Colors.grey),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 

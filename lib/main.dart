@@ -2,8 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:bread_road/core/theme/app_theme.dart';
 import 'package:bread_road/ui/pages/home/home_page.dart';
 import 'package:bread_road/ui/pages/login/login_page.dart';
+import 'package:intl/date_symbol_data_local.dart'; // 캘린더 intl 패키지한국어 데이터 추가
+import 'package:flutter_localizations/flutter_localizations.dart'; // 한국어 로캘 설정 추가하면 앱 전체 기본 위젯이 한국어로 바뀜!
 
-void main() {
+void main() async {
+  // 비동기작업을 위한 바인딩 초기화 필수
+  WidgetsFlutterBinding.ensureInitialized();
+  // intl 캘린더 패키지 한국어데이터
+  await initializeDateFormatting('ko_KR', null);
+
   runApp(const MyApp());
 }
 
@@ -24,6 +31,17 @@ class MyApp extends StatelessWidget {
         '/': (context) => const HomePage(),
         '/login': (context) => const LoginPage(),
       },
+      // 한국어 로캘 설정
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate, // 안드로이드용 위젯 한국어화
+        GlobalWidgetsLocalizations.delegate, // 기본 위젯 글자 방향 등 설정
+        GlobalCupertinoLocalizations.delegate, // ios용 위젯 한국어화
+      ],
+      // 사용자가 폰에 설정해둔 언어에 따라 실행이 바뀜
+      supportedLocales: const [
+        Locale('ko', 'KR'), // 앱이 지원하는 언어 목록
+        Locale('en', 'US'), // 영어, 미국
+      ],
     );
   }
 }
