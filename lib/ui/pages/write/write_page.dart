@@ -107,6 +107,10 @@ class _WritePageState extends State<WritePage> {
                     _buildTypeSelector(colorScheme, textTheme),
                     const SizedBox(height: 12),
 
+                    // 4. 카테고리 선택 (가로 스크롤)
+                    _buildCategorySelector(colorScheme, textTheme),
+                    const SizedBox(height: 12),
+
                     // 2. 사진 추가 영역 (비활성화)
                     const SizedBox(height: 12),
 
@@ -129,10 +133,6 @@ class _WritePageState extends State<WritePage> {
                       ),
                       validator: ValidatorUtil.validatorBreadNameError,
                     ),
-                    const SizedBox(height: 12),
-
-                    // 4. 카테고리 선택 (가로 스크롤)
-                    _buildCategorySelector(colorScheme, textTheme),
                     const SizedBox(height: 12),
 
                     Text(
@@ -506,6 +506,7 @@ class _WritePageState extends State<WritePage> {
           selectedOptions: _selectedTastes,
           onTap: (option) {
             setState(() {
+              // 한번 터치하면 추가되고 해제되고
               if (_selectedTastes.contains(option)) {
                 _selectedTastes.remove(option);
               } else {
@@ -594,7 +595,7 @@ class _WritePageState extends State<WritePage> {
               ),
             ),
             if (hasMultipleChoice) ...[
-              const SizedBox(width: 8),
+              const Spacer(),
               Text(
                 "중복선택 가능",
                 style: textTheme.labelSmall?.copyWith(color: Colors.grey),
@@ -688,29 +689,33 @@ class _WritePageState extends State<WritePage> {
   }
 }
 
+// 숫자 입렫 시 실시간으로 천단위 콤마를 찍어주는 '커스텀 포멧터'
 class _ThousandsSeparatorInputFormatter extends TextInputFormatter {
+  // 구분자
   static const separator = ',';
 
   @override
   TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
+    TextEditingValue oldValue, // 변경 전 입력값
     TextEditingValue newValue,
   ) {
+    // 만약 입력창이 비어있으면 빈 값 초기화
     if (newValue.text.isEmpty) {
       return newValue.copyWith(text: '');
     }
-
+    // 입력된 문자열에서 기존 콤마는 제거하고 숫자만 보여주기
     String plainNumber = newValue.text.replaceAll(separator, '');
+    // 글자수 8자리 초과안됨
     if (plainNumber.length > 8) {
       return oldValue;
     }
-
+    // 문자열은 무조건 정수로 int변환
     final int? value = int.tryParse(plainNumber);
     if (value == null) return oldValue;
-
+    // intl 패키지 넘버포멧을 사용
     final formatter = NumberFormat('#,###');
     final String newText = formatter.format(value);
-
+    // 텍스트와 함께 election커서 위치를 문자열 끝으로 항상 이동시킴!
     return newValue.copyWith(
       text: newText,
       selection: TextSelection.collapsed(offset: newText.length),
