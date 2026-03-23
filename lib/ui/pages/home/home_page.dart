@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:bread_road/ui/pages/post/post_page.dart';
 import 'package:bread_road/ui/pages/write/write_page.dart';
 import 'package:bread_road/ui/widgets/bottom_navigation_bar.dart';
 
@@ -56,7 +57,7 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
-      // 화면이 미끄러지듯 전환되게 만드는 위젯 PageView. 아직 해당 페이지 구현 전이라 연결안함
+      // 화면이 미끄러지듯 전환되게 만드는 위젯 PageView
       body: PageView(
         controller: _pageController,
         // 손가락 터치 시에도 화면전환
@@ -216,7 +217,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // 오늘의 빵 기록 카드섹션
+  // 오늘의 빵 기록 카드섹션.
   Widget _buildTodayBreadCard(TextTheme textTheme, ColorScheme colorScheme) {
     // 최신 기록이 있으면 해당 데이터를 사용, 없으면 기본값 표시
     final latestRecord = _recentRecords.isNotEmpty
@@ -341,7 +342,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // 최근 기록 리스트. 별점 설정 시 값 반영하기
+  // 최근 기록 리스트. 별점 설정 시 값 반영하기. 클릭 시 postPage로 이동함
   Widget _buildRecentRecordsList(TextTheme textTheme) {
     return Column(
       children: List.generate(_recentRecords.length, (index) {
@@ -391,7 +392,7 @@ class _HomePageState extends State<HomePage> {
                     final result = await Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => WritePage(initialData: record),
+                        builder: (context) => PostPage(data: record),
                       ),
                     );
 

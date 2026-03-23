@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:bread_road/core/utils/validator_util.dart';
-import 'package:bread_road/ui/widgets/bottom_navigation_bar.dart';
 
 // 저장된 내용은 postPage에 반영이 된다!
 class WritePage extends StatefulWidget {
@@ -70,6 +69,34 @@ class _WritePageState extends State<WritePage> {
       _bakeryController.text = data["bakery"] ?? "";
       _breadName = _nameController.text;
       _rating = double.tryParse(data["rating"].toString()) ?? 0.0;
+
+      // 추가 필드 복원
+      _currentType = data["mainType"] == "과자류"
+          ? WriteCategoryType.snack
+          : WriteCategoryType.bread;
+      _selectedCategory = data["subCategory"] ?? "전체";
+      _priceController.text = data["price"] ?? "";
+      _contentController.text = data["content"] ?? "";
+      _isScheduled = data["isScheduled"] ?? true;
+
+      if (data["visitDate"] != null) {
+        try {
+          _selectedDate = DateTime.parse(data["visitDate"]);
+        } catch (_) {
+          _selectedDate = DateTime.now();
+        }
+      }
+
+      if (data["tastes"] is List) {
+        _selectedTastes.addAll((data["tastes"] as List).cast<String>());
+      }
+      _selectedFlavor = data["flavor"];
+      if (data["scents"] is List) {
+        _selectedScents.addAll((data["scents"] as List).cast<String>());
+      }
+      if (data["textures"] is List) {
+        _selectedTextures.addAll((data["textures"] as List).cast<String>());
+      }
     }
   }
 
@@ -251,12 +278,6 @@ class _WritePageState extends State<WritePage> {
               ),
             ],
           ),
-        ),
-        bottomNavigationBar: CustomBottomNavigationBar(
-          currentIndex: 2,
-          onTap: (index) {
-            Navigator.pop(context, index);
-          },
         ),
       ),
     );
