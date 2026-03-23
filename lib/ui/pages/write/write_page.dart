@@ -119,25 +119,9 @@ class _WritePageState extends State<WritePage> {
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
         backgroundColor: colorScheme.surface,
-        appBar: AppBarWidget(
-          title: '글쓰기',
-          actions: [
-            TextButton(
-              onPressed: () {
-                // 등록 완료 플래그와 함께 팝업
-                Navigator.pop(context, {"isRegister": true});
-              },
-              // 텍스트테마 적용
-              child: const Text(
-                '등록',
-                style: TextStyle(
-                  color: Colors.blue,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ),
+        appBar: AppBarWidget(title: '글쓰기'),
+        // 13. extendBody를 true로 설정하여 바디 콘텐츠가 바텀바 영역까지 흐르도록 함 (투명 효과를 위해)
+        extendBody: true,
         body: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -224,59 +208,63 @@ class _WritePageState extends State<WritePage> {
                       ),
                     ),
 
-                    const SizedBox(height: 12),
-                    // 12. 저장하기 버튼. 꼭 잊지말고 다음페이지로 넘길 데이터 맵에 날짜정보 추가해주기!
-                    SizedBox(
-                      width: double.infinity,
-                      height: 56,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          final recordData = {
-                            "mainType": _currentType == WriteCategoryType.bread
-                                ? "빵류"
-                                : "과자류",
-                            "subCategory": _selectedCategory,
-                            "name": _nameController.text.isEmpty
-                                ? "빵 이름을 등록해주세요."
-                                : _nameController.text,
-                            "bakery": _bakeryController.text.isEmpty
-                                ? "가게명 없음"
-                                : _bakeryController.text,
-                            "rating": _rating.toString(),
-                            "price": _priceController.text,
-                            "isScheduled": _isScheduled,
-                            "tastes": _selectedTastes.toList(),
-                            "flavor": _selectedFlavor,
-                            "scents": _selectedScents.toList(),
-                            "textures": _selectedTextures.toList(),
-                            // 저장하기의 맵에서는 요일정보없이 이 형식으로만 저장하는게 나중에 데이터 정렬하거나 계산 시 훨씬 더 편리하다.
-                            "visitDate": DateFormat(
-                              'yyyy-MM-dd',
-                            ).format(_selectedDate),
-                          };
-                          Navigator.pop(context, recordData);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: colorScheme.primary,
-                          foregroundColor: colorScheme.onPrimary,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                        ),
-                        child: const Text(
-                          "저장하기",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
                     const SizedBox(height: 40),
+                    // 14. 바텀바가 투명이므로 마지막 요소가 가려지지 않게 넉넉한 하단 여백 추가
+                    const SizedBox(height: 100),
                   ],
                 ),
               ),
             ],
+          ),
+        ),
+        // 12. 저장하기 버튼을 바텀바에 고정 (배경 투명 처리)
+        bottomNavigationBar: Container(
+          color: Colors.transparent,
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+              child: SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: () {
+                    final recordData = {
+                      "mainType": _currentType == WriteCategoryType.bread
+                          ? "빵류"
+                          : "과자류",
+                      "subCategory": _selectedCategory,
+                      "name": _nameController.text.isEmpty
+                          ? "빵 이름을 등록해주세요."
+                          : _nameController.text,
+                      "bakery": _bakeryController.text.isEmpty
+                          ? "가게명 없음"
+                          : _bakeryController.text,
+                      "rating": _rating.toString(),
+                      "price": _priceController.text,
+                      "isScheduled": _isScheduled,
+                      "tastes": _selectedTastes.toList(),
+                      "flavor": _selectedFlavor,
+                      "scents": _selectedScents.toList(),
+                      "textures": _selectedTextures.toList(),
+                      // 저장하기의 맵에서는 요일정보없이 이 형식으로만 저장하는게 나중에 데이터 정렬하거나 계산 시 훨씬 더 편리하다.
+                      "visitDate": DateFormat('yyyy-MM-dd').format(_selectedDate),
+                    };
+                    Navigator.pop(context, recordData);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: colorScheme.onPrimary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                  ),
+                  child: const Text(
+                    "저장하기",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
       ),
@@ -718,7 +706,7 @@ class _WritePageState extends State<WritePage> {
     );
   }
 
-  // 10. 별점 위젯
+  // 10. 별점 위젯 (드래그 및 0.5단위 지원)
   Widget _buildRatingBar(ColorScheme colorScheme, TextTheme textTheme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -728,39 +716,71 @@ class _WritePageState extends State<WritePage> {
           style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 6),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: List.generate(5, (index) {
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _rating = index + 1.0;
-                    });
-                  },
-                  child: Icon(
-                    index < _rating ? Icons.star : Icons.star_border,
-                    color: index < _rating ? Colors.amber : Colors.grey[300],
-                    size: 32,
+        LayoutBuilder(
+          builder: (context, constraints) {
+            return GestureDetector(
+              // 터치 시작 및 이동 시 별점 계산
+              onHorizontalDragUpdate: (details) =>
+                  _updateRating(details.localPosition, constraints.maxWidth),
+              onTapDown: (details) =>
+                  _updateRating(details.localPosition, constraints.maxWidth),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: List.generate(5, (index) {
+                      IconData iconData = Icons.star_border;
+                      Color iconColor = Colors.grey[300]!;
+
+                      if (_rating >= index + 1) {
+                        iconData = Icons.star;
+                        iconColor = Colors.amber;
+                      } else if (_rating > index) {
+                        iconData = Icons.star_half;
+                        iconColor = Colors.amber;
+                      }
+
+                      return Icon(
+                        iconData,
+                        color: iconColor,
+                        size: 36, // 크기를 약간 키움
+                      );
+                    }),
                   ),
-                );
-              }),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              "총점 ${_rating.toStringAsFixed(1)}",
-              style: textTheme.labelSmall?.copyWith(
-                fontWeight: FontWeight.normal,
-                color: Colors.grey,
+                  const SizedBox(width: 12),
+                  Text(
+                    "총점 ${_rating.toStringAsFixed(1)}",
+                    style: textTheme.labelSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.primary,
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
+            );
+          },
         ),
       ],
     );
+  }
+
+  // 터치 좌표를 기반으로 별점을 0.5 단위로 계산하는 함수
+  void _updateRating(Offset localPosition, double maxWidth) {
+    // 별 5개의 전체 너비 대비 터치 위치 비율 (최대 너비를 별 5개 영역 정도로 제한)
+    final double starAreaWidth = 36.0 * 5;
+    double percent = localPosition.dx / starAreaWidth;
+    double rating = (percent * 5).clamp(0.0, 5.0);
+
+    // 0.5 단위로 반올림 (예: 4.2 -> 4.0, 4.3 -> 4.5)
+    rating = (rating * 2).round() / 2.0;
+
+    if (rating != _rating) {
+      setState(() {
+        _rating = rating;
+      });
+    }
   }
 }
 
