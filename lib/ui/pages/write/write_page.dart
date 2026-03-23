@@ -1,5 +1,6 @@
 import 'package:bread_road/core/enum/write_category_type.dart';
 import 'package:bread_road/core/utils/input_decoration_util.dart';
+import 'package:bread_road/core/utils/button_util.dart';
 import 'package:bread_road/ui/widgets/app_bar_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -217,55 +218,31 @@ class _WritePageState extends State<WritePage> {
             ],
           ),
         ),
-        // 12. 저장하기 버튼을 바텀바에 고정 (배경 투명 처리)
-        bottomNavigationBar: Container(
-          color: Colors.transparent,
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-              child: SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: () {
-                    final recordData = {
-                      "mainType": _currentType == WriteCategoryType.bread
-                          ? "빵류"
-                          : "과자류",
-                      "subCategory": _selectedCategory,
-                      "name": _nameController.text.isEmpty
-                          ? "빵 이름을 등록해주세요."
-                          : _nameController.text,
-                      "bakery": _bakeryController.text.isEmpty
-                          ? "가게명 없음"
-                          : _bakeryController.text,
-                      "rating": _rating.toString(),
-                      "price": _priceController.text,
-                      "isScheduled": _isScheduled,
-                      "tastes": _selectedTastes.toList(),
-                      "flavor": _selectedFlavor,
-                      "scents": _selectedScents.toList(),
-                      "textures": _selectedTextures.toList(),
-                      // 저장하기의 맵에서는 요일정보없이 이 형식으로만 저장하는게 나중에 데이터 정렬하거나 계산 시 훨씬 더 편리하다.
-                      "visitDate": DateFormat('yyyy-MM-dd').format(_selectedDate),
-                    };
-                    Navigator.pop(context, recordData);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: colorScheme.primary,
-                    foregroundColor: colorScheme.onPrimary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                  ),
-                  child: const Text(
-                    "저장하기",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-            ),
-          ),
+        // 12. 저장하기 버튼을 ButtonUtil로 디자인 통일 및 일관된 레이아웃 적용
+        bottomNavigationBar: ButtonUtil(
+          label: "저장하기",
+          onTap: () {
+            final recordData = {
+              "mainType": _currentType == WriteCategoryType.bread ? "빵류" : "과자류",
+              "subCategory": _selectedCategory,
+              "name": _nameController.text.isEmpty
+                  ? "빵 이름을 등록해주세요."
+                  : _nameController.text,
+              "bakery": _bakeryController.text.isEmpty
+                  ? "가게명 없음"
+                  : _bakeryController.text,
+              "rating": _rating.toString(),
+              "price": _priceController.text,
+              "isScheduled": _isScheduled,
+              "tastes": _selectedTastes.toList(),
+              "flavor": _selectedFlavor,
+              "scents": _selectedScents.toList(),
+              "textures": _selectedTextures.toList(),
+              // 저장하기의 맵에서 요일 정보 없이 이 형식으로만 저장
+              "visitDate": DateFormat('yyyy-MM-dd').format(_selectedDate),
+            };
+            Navigator.pop(context, recordData);
+          },
         ),
       ),
     );

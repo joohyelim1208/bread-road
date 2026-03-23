@@ -1,3 +1,4 @@
+import 'package:bread_road/core/utils/button_util.dart';
 import 'package:bread_road/ui/pages/write/write_page.dart';
 import 'package:bread_road/ui/widgets/app_bar_widget.dart';
 import 'package:flutter/material.dart';
@@ -29,16 +30,13 @@ class _PostPageState extends State<PostPage> {
     final data = _currentData;
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
-    final colorScheme = theme.colorScheme;
 
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBarWidget(
         title: '내 기록',
-        onBackPressed: () => Navigator.pop(context, {
-          "data": _currentData,
-          "goToRecord": true,
-        }),
+        onBackPressed: () =>
+            Navigator.pop(context, {"data": _currentData, "goToRecord": true}),
         actions: [
           IconButton(
             icon: Icon(
@@ -117,7 +115,8 @@ class _PostPageState extends State<PostPage> {
                     children: [
                       Row(
                         children: List.generate(5, (index) {
-                          double rating = double.tryParse(
+                          double rating =
+                              double.tryParse(
                                 data['rating']?.toString() ?? '0',
                               ) ??
                               0;
@@ -132,11 +131,7 @@ class _PostPageState extends State<PostPage> {
                             iconColor = Colors.amber;
                           }
 
-                          return Icon(
-                            iconData,
-                            color: iconColor,
-                            size: 24,
-                          );
+                          return Icon(iconData, color: iconColor, size: 24);
                         }),
                       ),
                       const SizedBox(width: 12),
@@ -151,7 +146,11 @@ class _PostPageState extends State<PostPage> {
                   const SizedBox(height: 24),
                   Row(
                     children: [
-                      const Icon(Icons.storefront, size: 20, color: Colors.grey),
+                      const Icon(
+                        Icons.storefront,
+                        size: 20,
+                        color: Colors.grey,
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -163,14 +162,20 @@ class _PostPageState extends State<PostPage> {
                       ),
                       Text(
                         "평점 0.0  리뷰 000+",
-                        style: textTheme.labelSmall?.copyWith(color: Colors.grey),
+                        style: textTheme.labelSmall?.copyWith(
+                          color: Colors.grey,
+                        ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      const Icon(Icons.location_on, size: 20, color: Colors.grey),
+                      const Icon(
+                        Icons.location_on,
+                        size: 20,
+                        color: Colors.grey,
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         "서울시 강남구 역삼동",
@@ -185,8 +190,11 @@ class _PostPageState extends State<PostPage> {
                   const SizedBox(height: 16),
                   Row(
                     children: [
-                      const Icon(Icons.calendar_today_outlined,
-                          size: 20, color: Colors.grey),
+                      const Icon(
+                        Icons.calendar_today_outlined,
+                        size: 20,
+                        color: Colors.grey,
+                      ),
                       const SizedBox(width: 12),
                       Text(
                         "방문날짜",
@@ -204,8 +212,11 @@ class _PostPageState extends State<PostPage> {
                   const SizedBox(height: 16),
                   Row(
                     children: [
-                      const Icon(Icons.check_circle_outline,
-                          size: 20, color: Colors.grey),
+                      const Icon(
+                        Icons.check_circle_outline,
+                        size: 20,
+                        color: Colors.grey,
+                      ),
                       const SizedBox(width: 12),
                       Text(
                         "시식여부",
@@ -250,44 +261,22 @@ class _PostPageState extends State<PostPage> {
           ],
         ),
       ),
-      // 7. 수정하기 버튼을 바텀바에 고정 (배경 투명 처리)
-      bottomNavigationBar: Container(
-        color: Colors.transparent,
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-            child: SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: () async {
-                  final result = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => WritePage(initialData: _currentData),
-                    ),
-                  );
-                  if (result != null && mounted) {
-                    setState(() {
-                      _currentData = result as Map<String, dynamic>;
-                    });
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: colorScheme.primary,
-                  foregroundColor: colorScheme.onPrimary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                ),
-                child: const Text(
-                  "수정하기",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-              ),
+      // 7. 수정하기 버튼을 ButtonUtil로 디자인 통일 및 그림자 효과가 포함된 하단 바 적용
+      bottomNavigationBar: ButtonUtil(
+        label: "수정하기",
+        onTap: () async {
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => WritePage(initialData: _currentData),
             ),
-          ),
-        ),
+          );
+          if (result != null && mounted) {
+            setState(() {
+              _currentData = result as Map<String, dynamic>;
+            });
+          }
+        },
       ),
     );
   }
@@ -348,7 +337,10 @@ class _PostPageState extends State<PostPage> {
             runSpacing: 8,
             children: values.map((value) {
               return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.grey[100],
                   borderRadius: BorderRadius.circular(12),
