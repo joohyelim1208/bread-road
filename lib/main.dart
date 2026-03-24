@@ -1,4 +1,6 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+
 import 'package:bread_road/core/theme/app_theme.dart';
 import 'package:bread_road/ui/pages/home/home_page.dart';
 import 'package:bread_road/ui/pages/login/login_page.dart';
@@ -10,6 +12,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // intl 캘린더 패키지 한국어데이터
   await initializeDateFormatting('ko_KR', null);
+  // 파이어베이스 초기화
+  await Firebase.initializeApp();
 
   runApp(const MyApp());
 }

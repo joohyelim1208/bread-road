@@ -1,4 +1,4 @@
-package com.bread_road.name
+package com.breadroad.name
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,0 +1,67 @@
+{
+  "project_info": {
+    "project_number": "826614414608",
+    "project_id": "bread-road",
+    "storage_bucket": "bread-road.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:826614414608:android:6be8b7971841c5e00d7995",
+        "android_client_info": {
+          "package_name": "com.bread_road.name"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBi207Qsh60S2wjM5o8CEKfiuUqGujUZ4c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:826614414608:android:7f0d94198fd236460d7995",
+        "android_client_info": {
+          "package_name": "com.breadroad.name"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBi207Qsh60S2wjM5o8CEKfiuUqGujUZ4c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:826614414608:android:722f2b7835a013ce0d7995",
+        "android_client_info": {
+          "package_name": "com.example.profile_picker_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBi207Qsh60S2wjM5o8CEKfiuUqGujUZ4c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
