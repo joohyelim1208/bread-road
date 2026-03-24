@@ -160,6 +160,7 @@ class _PostPageState extends State<PostPage> {
                           ),
                         ),
                       ),
+                      // 임시로 넣어둔 것. 추후 위치데이터 연동 가능 시 반영하기
                       Text(
                         "평점 0.0  리뷰 000+",
                         style: textTheme.labelSmall?.copyWith(

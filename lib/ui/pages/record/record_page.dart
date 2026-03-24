@@ -134,10 +134,8 @@ class _RecordPageState extends State<RecordPage> {
                       const SizedBox(width: 8),
                       // 별점 (0.5 단위 반쪽 별 지원)
                       ...List.generate(5, (index) {
-                        final double r = double.tryParse(
-                              record["rating"].toString(),
-                            ) ??
-                            0.0;
+                        final double r =
+                            double.tryParse(record["rating"].toString()) ?? 0.0;
                         IconData iconData = Icons.star_border;
                         Color iconColor = Colors.grey[300]!;
 
@@ -149,11 +147,7 @@ class _RecordPageState extends State<RecordPage> {
                           iconColor = Colors.amber;
                         }
 
-                        return Icon(
-                          iconData,
-                          size: 12,
-                          color: iconColor,
-                        );
+                        return Icon(iconData, size: 12, color: iconColor);
                       }),
                       const SizedBox(width: 4),
                       Text(
