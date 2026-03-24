@@ -21,7 +21,7 @@ class _HomePageState extends State<HomePage> {
     {
       "name": "바게트 샌드위치",
       "bakery": "건강한 빵집",
-      "rating": "4.2",
+      "rating": "4.5",
       "isFavorite": false,
     },
     {"name": "크로와상", "bakery": "빵빵한 빵집", "rating": "4.5", "isFavorite": false},
@@ -87,102 +87,125 @@ class _HomePageState extends State<HomePage> {
   // 메인 홈 화면 UI
   Widget _buildHomeView(TextTheme textTheme, ColorScheme colorScheme) {
     return SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "오늘 먹은 빵 기록하기",
-                  style: textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                IconButton(
-                  onPressed: () async {
-                    final result = await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const WritePage(),
-                      ),
-                    );
-
-                    if (result != null) {
-                      setState(() {
-                        if (result is int) {
-                          _onItemTapped(result);
-                          return;
-                        }
-
-                        if (result is Map<String, dynamic>) {
-                          // 새로 작성 시 전체 리스트 처음에 추가
-                          if (result["isDeleted"] != true) {
-                            _allRecords.insert(
-                              0,
-                              Map<String, dynamic>.from(result),
-                            );
-
-                            // 작성 후 즉시 내 기록 탭으로 이동하고 싶을 경우
-                            _onItemTapped(2);
-                          }
-                        }
-                      });
-                    }
-                  },
-                  icon: const Icon(Icons.add_circle, size: 32),
-                  color: colorScheme.primary,
+      child: Column(
+        children: [
+          // 1. 고정된 상단 헤더 영역 (Sticky Header) - 그림자 효과 추가
+          Container(
+            decoration: BoxDecoration(
+              color: colorScheme.surface,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
                 ),
               ],
             ),
-            const SizedBox(height: 30),
-            Text(
-              "오늘의 빵 기록",
-              style: textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 10),
-            _buildTodayBreadCard(textTheme, colorScheme),
-            const SizedBox(height: 40),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "최근 기록",
-                  style: textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                TextButton(
-                  onPressed: () => _onItemTapped(2),
-                  child: Text(
-                    "+ 더보기",
-                    style: textTheme.bodySmall?.copyWith(
-                      color: Colors.grey[600],
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "오늘 먹은 빵 기록하기",
+                    style: textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            _buildRecentRecordsList(textTheme),
-            const SizedBox(height: 40),
-            Text(
-              "추천 빵집",
-              style: textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+                  IconButton(
+                    onPressed: () async {
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const WritePage(),
+                        ),
+                      );
+
+                      if (result != null) {
+                        setState(() {
+                          if (result is int) {
+                            _onItemTapped(result);
+                            return;
+                          }
+
+                          if (result is Map<String, dynamic>) {
+                            // 새로 작성 시 전체 리스트 처음에 추가
+                            if (result["isDeleted"] != true) {
+                              _allRecords.insert(
+                                0,
+                                Map<String, dynamic>.from(result),
+                              );
+
+                              // 작성 후 즉시 내 기록 탭으로 이동하고 싶을 경우
+                              _onItemTapped(2);
+                            }
+                          }
+                        });
+                      }
+                    },
+                    icon: const Icon(Icons.add_circle, size: 32),
+                    color: colorScheme.primary,
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 10),
-            _buildRecommendedBakeries(textTheme, colorScheme),
-            const SizedBox(height: 40),
-          ],
-        ),
+          ),
+
+          // 2. 스크롤 가능한 본문 영역
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 10),
+                  Text(
+                    "오늘의 빵 기록",
+                    style: textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  _buildTodayBreadCard(textTheme, colorScheme),
+                  const SizedBox(height: 40),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "최근 기록",
+                        style: textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () => _onItemTapped(2),
+                        child: Text(
+                          "+ 더보기",
+                          style: textTheme.bodySmall?.copyWith(
+                            color: Colors.grey[600],
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  _buildRecentRecordsList(textTheme),
+                  const SizedBox(height: 40),
+                  Text(
+                    "추천 빵집",
+                    style: textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  _buildRecommendedBakeries(textTheme, colorScheme),
+                  const SizedBox(height: 40),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -235,7 +258,7 @@ class _HomePageState extends State<HomePage> {
       width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(5),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withAlpha(30),
@@ -248,7 +271,7 @@ class _HomePageState extends State<HomePage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(5)),
             child: Container(
               height: 200,
               width: double.infinity,
@@ -297,27 +320,20 @@ class _HomePageState extends State<HomePage> {
                     // 5. 별점 (0.5 단위 반쪽 별 지원)
                     Row(
                       mainAxisSize: MainAxisSize.min,
-                      children: List.generate(
-                        5,
-                        (index) {
-                          IconData iconData = Icons.star_border;
-                          Color iconColor = Colors.grey[300]!;
+                      children: List.generate(5, (index) {
+                        IconData iconData = Icons.star_border;
+                        Color iconColor = Colors.grey[300]!;
 
-                          if (rating >= index + 1) {
-                            iconData = Icons.star;
-                            iconColor = Colors.amber;
-                          } else if (rating > index) {
-                            iconData = Icons.star_half;
-                            iconColor = Colors.amber;
-                          }
+                        if (rating >= index + 1) {
+                          iconData = Icons.star;
+                          iconColor = Colors.amber;
+                        } else if (rating > index) {
+                          iconData = Icons.star_half;
+                          iconColor = Colors.amber;
+                        }
 
-                          return Icon(
-                            iconData,
-                            size: 18,
-                            color: iconColor,
-                          );
-                        },
-                      ),
+                        return Icon(iconData, size: 18, color: iconColor);
+                      }),
                     ),
                     const SizedBox(height: 4),
                     IconButton(
@@ -359,7 +375,7 @@ class _HomePageState extends State<HomePage> {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Colors.grey[50],
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(5),
             ),
             child: Row(
               children: [
@@ -368,7 +384,7 @@ class _HomePageState extends State<HomePage> {
                   height: 60,
                   decoration: BoxDecoration(
                     color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(5),
                   ),
                   child: const Icon(Icons.image, color: Colors.grey),
                 ),
@@ -394,9 +410,8 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
                           ...List.generate(5, (index) {
-                            final double r = double.tryParse(
-                                  record["rating"].toString(),
-                                ) ??
+                            final double r =
+                                double.tryParse(record["rating"].toString()) ??
                                 0.0;
                             IconData iconData = Icons.star_border;
                             Color iconColor = Colors.grey[300]!;
@@ -409,11 +424,7 @@ class _HomePageState extends State<HomePage> {
                               iconColor = Colors.amber;
                             }
 
-                            return Icon(
-                              iconData,
-                              size: 12,
-                              color: iconColor,
-                            );
+                            return Icon(iconData, size: 12, color: iconColor);
                           }),
                           Text(
                             " ${record["rating"]}",
@@ -465,7 +476,7 @@ class _HomePageState extends State<HomePage> {
             width: 200,
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(5),
               border: Border.all(color: Colors.grey[100]!),
               boxShadow: [
                 BoxShadow(
@@ -480,7 +491,7 @@ class _HomePageState extends State<HomePage> {
               children: [
                 ClipRRect(
                   borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(20),
+                    top: Radius.circular(5),
                   ),
                   child: Container(
                     height: 110,

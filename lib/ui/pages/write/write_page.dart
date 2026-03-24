@@ -238,6 +238,8 @@ class _WritePageState extends State<WritePage> {
               "flavor": _selectedFlavor,
               "scents": _selectedScents.toList(),
               "textures": _selectedTextures.toList(),
+              // 11번. 글쓰기 내용(content)이 저장되지 않던 문제 해결를 위해 필드 추가
+              "content": _contentController.text,
               // 저장하기의 맵에서 요일 정보 없이 이 형식으로만 저장
               "visitDate": DateFormat('yyyy-MM-dd').format(_selectedDate),
             };
