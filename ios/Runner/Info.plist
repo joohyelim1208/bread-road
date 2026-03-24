@@ -72,5 +72,48 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<!-- ============================================ -->
+	<!-- 카카오 로그인: URL Scheme 설정                 -->
+	<!-- ============================================ -->
+	<!-- TODO: YOUR_KAKAO_NATIVE_APP_KEY를 실제 키로 교체하세요 -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<!-- 카카오 로그인 URL Scheme -->
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>kakao-login</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>kakaoabd630016d2b9f88f1c1c2c742d98e94</string>
+			</array>
+		</dict>
+		<!-- ============================================ -->
+		<!-- Google Sign-In: URL Scheme 설정              -->
+		<!-- ============================================ -->
+		<!-- GoogleService-Info.plist의 REVERSED_CLIENT_ID 값을 -->
+		<!-- 아래 {YOUR_REVERSED_CLIENT_ID} 자리에 붙여넣으세요 -->
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>google-sign-in</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.826614414608-ooc27gnqr07h3v3bmqmvq6hfnl5j5e63</string>
+			</array>
+		</dict>
+	</array>
+
+	<!-- ============================================ -->
+	<!-- 카카오톡 앱 실행 허용 (iOS 9+)                 -->
+	<!-- ============================================ -->
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>kakaokompassauth</string>
+		<string>kakaolink</string>
+		<string>kakaoplus</string>
+	</array>
 </dict>
 </plist>

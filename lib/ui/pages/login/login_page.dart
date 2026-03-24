@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bread_road/ui/pages/join/join_page.dart';
+import 'package:bread_road/ui/widgets/social_login_button.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
@@ -54,34 +55,31 @@ class LoginPage extends StatelessWidget {
               ),
               const Spacer(flex: 4),
               // 소셜 로그인 섹션
-              _buildLoginButton(
-                label: '카카오톡으로 시작하기',
-                onPressed: () {},
-                backgroundColor: const Color(0xFFFEE500),
-                foregroundColor: Colors.black87,
-                icon: Icons.chat_bubble,
+              // 1. 카카오 로그인
+              SocialLoginButton.kakao(
+                onPressed: () {
+                  print("카카오 로그인 시도");
+                },
               ),
               const SizedBox(height: 12),
-              _buildLoginButton(
-                label: '구글로 시작하기',
-                onPressed: () {},
-                backgroundColor: Colors.white,
-                foregroundColor: Colors.black87,
-                isBorder: true,
-                icon: Icons.g_mobiledata,
+              // 2. 구글 로그인
+              SocialLoginButton.google(
+                onPressed: () {
+                  print("구글 로그인 시도");
+                },
               ),
               const SizedBox(height: 12),
-              _buildLoginButton(
-                label: '다른 방법으로 시작하기',
+              // 3. 다른 방법으로 로그인(일반생성자로 직접 커스텀하기)
+              SocialLoginButton(
+                text: "다른 방법으로 시작하기",
+                backgroundColor: colorScheme.primary,
+                textColor: colorScheme.onPrimary,
                 onPressed: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => const JoinPage()),
                   );
                 },
-                backgroundColor: colorScheme.primary,
-                foregroundColor: colorScheme.onPrimary,
-                icon: Icons.mail_outline,
               ),
               const SizedBox(height: 24),
               TextButton(
@@ -118,49 +116,4 @@ class LoginPage extends StatelessWidget {
       ),
     );
   }
-}
-
-// 공통적용
-Widget _buildLoginButton({
-  required String label,
-  required VoidCallback onPressed,
-  required Color backgroundColor,
-  required Color foregroundColor,
-  bool isBorder = false,
-  IconData? icon,
-}) {
-  return SizedBox(
-    width: double.infinity,
-    height: 56,
-    child: ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: backgroundColor,
-        foregroundColor: foregroundColor,
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: isBorder
-              ? BorderSide(color: Colors.grey[300]!)
-              : BorderSide.none,
-        ),
-      ),
-      child: Stack(
-        children: [
-          if (icon != null)
-            Align(alignment: Alignment.centerLeft, child: Icon(icon, size: 24)),
-          Center(
-            child: Text(
-              label,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                letterSpacing: -0.5,
-              ),
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
 }
