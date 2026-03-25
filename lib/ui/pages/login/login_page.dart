@@ -1,166 +1,180 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:bread_road/ui/pages/join/join_page.dart';
+import 'package:bread_road/services/firebase/firebase_google_auth_service.dart';
+import 'package:bread_road/services/firebase/kakao_oidc_auth_service.dart';
+import 'package:bread_road/ui/widgets/social_login_button.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
   @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final _googleAuth = FirebaseGoogleAuthService();
+  final _kakaoOidcAuth = KakaoOidcAuthService();
+
+  bool _isGoogleLoading = false;
+  bool _isKakaoLoading = false;
+
+  @override
   Widget build(BuildContext context) {
+    return Scaffold(backgroundColor: Colors.white, body: _buildLoginUI());
+  }
+
+  Widget _buildLoginUI() {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
-    final colorScheme = theme.colorScheme;
 
-    return Scaffold(
-      backgroundColor: colorScheme.surface,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const Spacer(flex: 3),
-              // 로고 영역 (아이콘으로 임시 대체)
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  color: colorScheme.primary.withAlpha(10),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.bakery_dining,
-                  size: 48,
-                  color: colorScheme.primary,
-                ),
-              ),
-              const SizedBox(height: 32),
-              Text(
-                '한 뼘',
-                textAlign: TextAlign.center,
-                style: textTheme.headlineLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  height: 1.4,
-                  color: colorScheme.onSurface,
-                ),
-              ),
-              Text(
-                '한 걸음씩 찾아가는 나만의 빵 취향',
-                textAlign: TextAlign.center,
-                style: textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  height: 1.4,
-                  color: colorScheme.onSurface,
-                ),
-              ),
-              const Spacer(flex: 4),
-              // 소셜 로그인 섹션
-              _buildLoginButton(
-                label: '카카오톡으로 시작하기',
-                onPressed: () {},
-                backgroundColor: const Color(0xFFFEE500),
-                foregroundColor: Colors.black87,
-                icon: Icons.chat_bubble,
-              ),
-              const SizedBox(height: 12),
-              _buildLoginButton(
-                label: '구글로 시작하기',
-                onPressed: () {},
-                backgroundColor: Colors.white,
-                foregroundColor: Colors.black87,
-                isBorder: true,
-                icon: Icons.g_mobiledata,
-              ),
-              const SizedBox(height: 12),
-              _buildLoginButton(
-                label: '다른 방법으로 시작하기',
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const JoinPage()),
-                  );
-                },
-                backgroundColor: colorScheme.primary,
-                foregroundColor: colorScheme.onPrimary,
-                icon: Icons.mail_outline,
-              ),
-              const SizedBox(height: 24),
-              TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const JoinPage()),
-                  );
-                },
-                style: TextButton.styleFrom(minimumSize: const Size(100, 44)),
-                child: RichText(
-                  text: TextSpan(
-                    style: textTheme.bodyMedium?.copyWith(
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        child: Column(
+          children: [
+            const Spacer(flex: 2),
+
+            // 상단 로고 및 타이틀
+            Center(
+              child: Column(
+                children: [
+                  // 임시 빵 아이콘 로고
+                  Icon(
+                    Icons.bakery_dining,
+                    size: 80,
+                    color: theme.colorScheme.primary,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Bread Road',
+                    style: textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: -0.5,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '빵으로 잇는 일상의 지도',
+                    style: textTheme.bodyLarge?.copyWith(
                       color: Colors.grey[600],
                     ),
-                    children: [
-                      const TextSpan(text: "이미 계정이 있나요? "),
-                      TextSpan(
-                        text: "로그인하기",
-                        style: TextStyle(
-                          color: colorScheme.primary,
-                          fontWeight: FontWeight.bold,
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
-                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            const Spacer(flex: 3),
+
+            // 소셜 로그인 버튼
+            SocialLoginButton.google(
+              onPressed: _handleGoogleLogin,
+              isLoading: _isGoogleLoading,
+            ),
+            const SizedBox(height: 12),
+            SocialLoginButton.kakao(
+              onPressed: _handleKakaoLogin,
+              isLoading: _isKakaoLoading,
+            ),
+            const SizedBox(height: 16),
+
+            //다른 방법으로 로그인
+            SocialLoginButton(
+              text: '다른 방법으로 로그인하기',
+              backgroundColor: Colors.grey.shade100,
+              textColor: Colors.black54,
+              icon: Icons.mail_outline,
+              onPressed: () => Navigator.pushNamed(context, '/join'),
+            ),
+
+            const SizedBox(height: 16),
+
+            //이미 계정이 있으신가요?
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  '이미 계정이 있으신가요? ',
+                  style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                ),
+                GestureDetector(
+                  onTap: _handleCheckExistingLogin,
+                  child: const Text(
+                    '로그인하기',
+                    style: TextStyle(
+                      color: Colors.black87,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      decoration: TextDecoration.underline,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 20),
-            ],
-          ),
+              ],
+            ),
+            const SizedBox(height: 40),
+          ],
         ),
       ),
     );
   }
-}
 
-// 공통적용
-Widget _buildLoginButton({
-  required String label,
-  required VoidCallback onPressed,
-  required Color backgroundColor,
-  required Color foregroundColor,
-  bool isBorder = false,
-  IconData? icon,
-}) {
-  return SizedBox(
-    width: double.infinity,
-    height: 56,
-    child: ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: backgroundColor,
-        foregroundColor: foregroundColor,
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: isBorder
-              ? BorderSide(color: Colors.grey[300]!)
-              : BorderSide.none,
-        ),
-      ),
-      child: Stack(
-        children: [
-          if (icon != null)
-            Align(alignment: Alignment.centerLeft, child: Icon(icon, size: 24)),
-          Center(
-            child: Text(
-              label,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                letterSpacing: -0.5,
-              ),
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
+  // ── 인증 로직 ──
+
+  /// 소셜 로그인 성공 시 실행되는 공통 내비게이션 로직
+  void _onSuccessLogin() {
+    // 닉네임 등록을 위해 JoinPage로 이동
+    if (mounted) {
+      Navigator.pushNamed(context, '/join');
+    }
+  }
+
+  /// '로그인하기' 버튼 클릭 시: 이미 로그인이 되어있는지 확인 후 홈으로 이동
+  void _handleCheckExistingLogin() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      // 이미 로그인 상태라면 홈 화면으로 이동
+      Navigator.pushReplacementNamed(context, '/');
+    } else {
+      // 로그인이 안 되어 있다면 안내 메시지
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('소셜 로그인을 먼저 진행해주세요.')));
+    }
+  }
+
+  Future<void> _handleGoogleLogin() async {
+    setState(() => _isGoogleLoading = true);
+    try {
+      final result = await _googleAuth.signInWithGoogle();
+      if (result != null) {
+        _onSuccessLogin();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('구글 로그인 실패: $e')));
+      }
+    } finally {
+      if (mounted) setState(() => _isGoogleLoading = false);
+    }
+  }
+
+  Future<void> _handleKakaoLogin() async {
+    setState(() => _isKakaoLoading = true);
+    try {
+      final result = await _kakaoOidcAuth.signInWithKakao();
+      if (result != null) {
+        _onSuccessLogin();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('카카오 로그인 실패: $e')));
+      }
+    } finally {
+      if (mounted) setState(() => _isKakaoLoading = false);
+    }
+  }
 }

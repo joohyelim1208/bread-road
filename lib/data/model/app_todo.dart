@@ -1,9 +1,10 @@
+// writePage, recordWritePage 공통 사용
 class AppTodo {
   final String id;
   final String title;
   final DateTime scheduleAt; // 날짜+시간. intl패키지 예쁘게 나옴
   final bool isFavorite;
-  final bool isDone;
+  final bool isDone; // 라이트페이지: 방문완료, 레시피페이지: 제작완료
 
   const AppTodo({
     required this.id,
