@@ -73,7 +73,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '826614414608',
     projectId: 'bread-road',
     storageBucket: 'bread-road.firebasestorage.app',
-    iosBundleId: 'com.example.breadRoad',
+    iosBundleId: 'com.example.breadroad',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
