@@ -18,6 +18,48 @@ class _LoginPageState extends State<LoginPage> {
   bool _isGoogleLoading = false;
   bool _isKakaoLoading = false;
 
+  // 배경 애니메이션을 위한 컨트롤러
+  late final ScrollController _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+    // 프레임 렌더링 후 애니메이션 시작
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _startBackgroundAnimation();
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  // 무한 흐르는 애니메이션 로직
+  void _startBackgroundAnimation() {
+    if (!_scrollController.hasClients) return;
+
+    // 현재 위치에서 끝까지 이동
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    const duration = Duration(seconds: 360); // 360초 동안 매우 천천히 이동
+
+    _scrollController
+        .animateTo(
+          maxScroll,
+          duration: duration,
+          curve: Curves.linear,
+        )
+        .then((_) {
+          if (mounted) {
+            // 끝에 도달하면 즉시 처음으로 점프 후 다시 시작
+            _scrollController.jumpTo(0);
+            _startBackgroundAnimation();
+          }
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(backgroundColor: Colors.white, body: _buildLoginUI());
@@ -27,94 +69,139 @@ class _LoginPageState extends State<LoginPage> {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
 
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
-        child: Column(
-          children: [
-            const Spacer(flex: 2),
-
-            // 상단 로고 및 타이틀
-            Center(
-              child: Column(
-                children: [
-                  // 임시 빵 아이콘 로고
-                  Icon(
-                    Icons.bakery_dining,
-                    size: 80,
-                    color: theme.colorScheme.primary,
+    return Stack(
+      children: [
+        // 1. 무한히 흐르는 배경 이미지 (SingleChildScrollView 사용)
+        Positioned.fill(
+          child: IgnorePointer(
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: List.generate(
+                  3,
+                  (index) => Image.asset(
+                    'assets/images/bread.webp',
+                    height: MediaQuery.of(context).size.height,
+                    fit: BoxFit.fitHeight,
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Bread Road',
-                    style: textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: -0.5,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '빵으로 잇는 일상의 지도',
-                    style: textTheme.bodyLarge?.copyWith(
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
-
-            const Spacer(flex: 3),
-
-            // 소셜 로그인 버튼
-            SocialLoginButton.google(
-              onPressed: _handleGoogleLogin,
-              isLoading: _isGoogleLoading,
-            ),
-            const SizedBox(height: 12),
-            SocialLoginButton.kakao(
-              onPressed: _handleKakaoLogin,
-              isLoading: _isKakaoLoading,
-            ),
-            const SizedBox(height: 16),
-
-            //다른 방법으로 로그인
-            SocialLoginButton(
-              text: '다른 방법으로 로그인하기',
-              backgroundColor: Colors.grey.shade100,
-              textColor: Colors.black54,
-              icon: Icons.mail_outline,
-              onPressed: () => Navigator.pushNamed(context, '/join'),
-            ),
-
-            const SizedBox(height: 16),
-
-            //이미 계정이 있으신가요?
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+          ),
+        ),
+        // 2. 전체적인 분위기를 위한 옅은 오버레이 (30%)
+        Positioned.fill(
+          child: Container(
+            color: Colors.white.withValues(alpha: 0.3),
+          ),
+        ),
+        // 3. 실제 로그인 UI 콘텐츠
+        SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Column(
               children: [
-                Text(
-                  '이미 계정이 있으신가요? ',
-                  style: TextStyle(color: Colors.grey[600], fontSize: 13),
-                ),
-                GestureDetector(
-                  onTap: _handleCheckExistingLogin,
-                  child: const Text(
-                    '로그인하기',
-                    style: TextStyle(
-                      color: Colors.black87,
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      decoration: TextDecoration.underline,
-                    ),
+                const Spacer(flex: 3),
+
+                // 중앙 메인 텍스트 영역 (가독성을 위한 흰색 박스 추가)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 32,
+                    horizontal: 40,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.8), // 80% 투명도
+                    borderRadius: BorderRadius.circular(28),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Bread Road',
+                        style: textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: -0.5,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        '빵으로 잇는 일상의 지도',
+                        style: textTheme.bodyLarge?.copyWith(
+                          color: Colors.black87.withValues(alpha: 0.7),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
+
+                const Spacer(flex: 3),
+
+                // 소셜 로그인 버튼
+                SocialLoginButton.google(
+                  onPressed: _handleGoogleLogin,
+                  isLoading: _isGoogleLoading,
+                ),
+                const SizedBox(height: 12),
+                SocialLoginButton.kakao(
+                  onPressed: _handleKakaoLogin,
+                  isLoading: _isKakaoLoading,
+                ),
+                const SizedBox(height: 16),
+
+                //다른 방법으로 로그인
+                SocialLoginButton(
+                  text: '다른 방법으로 로그인하기',
+                  backgroundColor: theme.colorScheme.primary, // 메인 컬러
+                  textColor: theme.colorScheme.onPrimary,
+                  icon: Icons.mail_outline,
+                  onPressed: () => Navigator.pushNamed(context, '/join'),
+                ),
+
+                const SizedBox(height: 24),
+
+                //이미 계정이 있으신가요? (가독성을 위한 흰색 박스 추가)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.8),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        '이미 계정이 있으신가요? ',
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 13,
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: _handleCheckExistingLogin,
+                        child: const Text(
+                          '로그인하기',
+                          style: TextStyle(
+                            color: Colors.black87,
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 40),
               ],
             ),
-            const SizedBox(height: 40),
-          ],
+          ),
         ),
-      ),
+      ],
     );
   }
 

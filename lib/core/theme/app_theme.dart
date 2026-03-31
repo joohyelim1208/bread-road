@@ -9,7 +9,7 @@ class AppTheme {
     useMaterial3: true,
     colorScheme: AppColorScheme.lightColorScheme,
     textTheme: AppTextTheme.lightTextTheme,
-    inputDecorationTheme: _inputDecorationTheme(
+    inputDecorationTheme: _buildInputTheme(
       AppColorScheme.lightColorScheme,
       AppTextTheme.lightTextTheme,
     ),
@@ -26,7 +26,7 @@ class AppTheme {
     brightness: Brightness.dark,
     colorScheme: AppColorScheme.darkColorScheme,
     textTheme: AppTextTheme.darkTextTheme,
-    inputDecorationTheme: _inputDecorationTheme(
+    inputDecorationTheme: _buildInputTheme(
       AppColorScheme.darkColorScheme,
       AppTextTheme.darkTextTheme,
     ),
@@ -48,41 +48,44 @@ class AppTheme {
         backgroundColor: colors.primary,
         minimumSize: const Size.fromHeight(56),
         textStyle: texts.labelLarge,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
       ),
     );
   }
 
-  // 입력창 테마도 모드에 따라 대응 가능하게
-  static InputDecorationTheme _inputDecorationTheme(
+  /// ==========================================================
+  /// 텍스트 필드 디자인 (Minimal Input)
+  /// ==========================================================
+  static InputDecorationTheme _buildInputTheme(
     ColorScheme colors,
     TextTheme texts,
   ) {
     return InputDecorationTheme(
-      hintStyle: texts.bodyMedium,
-      contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-      // 텍스트 테마 적용
+      filled: true,
+      fillColor: colors.surface,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      labelStyle: texts.bodyMedium,
+      hintStyle: texts.bodyMedium?.copyWith(color: Colors.grey[400]),
       helperStyle: texts.labelSmall,
       errorStyle: texts.labelSmall?.copyWith(color: colors.error),
       border: WidgetStateInputBorder.resolveWith((states) {
-        print(states);
         // 1. 에러가 포함될 때. 가장 먼저 체크
         if (states.contains(WidgetState.error)) {
           return OutlineInputBorder(
-            borderRadius: BorderRadius.circular(20),
-            borderSide: BorderSide(color: colors.error, width: 2),
+            borderRadius: BorderRadius.circular(5),
+            borderSide: BorderSide(color: colors.error, width: 1.5),
           );
         }
         // 2. 포커스 받았을 때
         if (states.contains(WidgetState.focused)) {
           return OutlineInputBorder(
-            borderRadius: BorderRadius.circular(20),
-            borderSide: BorderSide(color: colors.primary, width: 2),
+            borderRadius: BorderRadius.circular(5),
+            borderSide: BorderSide(color: colors.primary, width: 1.5),
           );
         }
         // 3. 기본 디폴트 값
         return OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(5),
           borderSide: BorderSide(color: colors.outlineVariant, width: 1),
         );
       }),

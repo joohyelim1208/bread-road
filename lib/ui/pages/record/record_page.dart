@@ -74,6 +74,7 @@ class _RecordPageState extends State<RecordPage> {
     int index,
     TextTheme textTheme,
   ) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: () async {
         // 상세 페이지로 이동하고, 거기서 수정한 정보를 결과값으로 받아온다.
@@ -87,8 +88,8 @@ class _RecordPageState extends State<RecordPage> {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.grey[50], // 부드러운 배경색
-          borderRadius: BorderRadius.circular(16),
+          color: theme.colorScheme.surface.withValues(alpha: 0.5), // 테마 기반 반투명 배경
+          borderRadius: BorderRadius.circular(5),
           border: Border.all(color: Colors.grey[100]!),
         ),
         child: Row(
@@ -99,7 +100,7 @@ class _RecordPageState extends State<RecordPage> {
               height: 60,
               decoration: BoxDecoration(
                 color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(5),
               ),
               child: const Icon(
                 Icons.bakery_dining_outlined,

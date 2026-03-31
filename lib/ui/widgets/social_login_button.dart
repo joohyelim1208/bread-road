@@ -67,7 +67,7 @@ class SocialLoginButton extends StatelessWidget {
           foregroundColor: textColor,
           elevation: 1,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(26),
             side: backgroundColor == Colors.white
                 ? const BorderSide(color: Colors.grey)
                 : BorderSide.none,

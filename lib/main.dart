@@ -7,6 +7,7 @@ import 'package:bread_road/core/theme/app_theme.dart';
 import 'package:bread_road/ui/pages/home/home_page.dart';
 import 'package:bread_road/ui/pages/login/login_page.dart';
 import 'package:bread_road/ui/pages/join/join_page.dart';
+import 'package:bread_road/ui/pages/splash/splash_page.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl/date_symbol_data_local.dart'; // 캘린더 intl 패키지한국어 데이터 추가
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -53,11 +54,12 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
-      // 초기화면 설정(로그인이 안된거면 로그인페이지)
-      initialRoute: '/login',
+      // 초기화면 설정(스플래시 화면)
+      initialRoute: '/splash',
       // 고라우터 삭제. 라우트 경로
       routes: {
         '/': (context) => const HomePage(),
+        '/splash': (context) => const SplashPage(),
         '/login': (context) => const LoginPage(),
         '/join': (context) => const JoinPage(),
       },

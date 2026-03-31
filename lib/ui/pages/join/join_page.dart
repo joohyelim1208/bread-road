@@ -195,7 +195,7 @@ class _JoinPageState extends State<JoinPage> {
           foregroundColor: colorScheme.onPrimary,
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(28),
           ),
         ),
         child: _isLoading

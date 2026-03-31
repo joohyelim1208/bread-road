@@ -2,12 +2,22 @@ import 'package:flutter/material.dart';
 
 class AppColorScheme {
   static ColorScheme _buildColorScheme(Brightness brightness) {
-    return ColorScheme.fromSeed(
-      // 브랜드 컬러
-      seedColor: const Color.fromARGB(255, 255, 161, 9),
-      brightness: brightness,
-      // 특정 색상 지정이 필요하면 덮어쓰기 primary,
-    );
+    if (brightness == Brightness.light) {
+      return ColorScheme.fromSeed(
+        seedColor: const Color(0xFF757575),
+        primary: const Color(0xFF757575),
+        onPrimary: Colors.white,
+        surface: const Color(0xFFFAFAFA),
+        onSurface: Colors.black87,
+        error: Colors.red,
+        brightness: Brightness.light,
+      );
+    } else {
+      return ColorScheme.fromSeed(
+        seedColor: const Color(0xFF757575),
+        brightness: Brightness.dark,
+      );
+    }
   }
 
   static final ColorScheme lightColorScheme = _buildColorScheme(

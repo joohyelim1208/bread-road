@@ -190,7 +190,7 @@ class _HomePageState extends State<HomePage> {
                     ],
                   ),
                   const SizedBox(height: 10),
-                  _buildRecentRecordsList(textTheme),
+                  _buildRecentRecordsList(textTheme, colorScheme),
                   const SizedBox(height: 40),
                   Text(
                     "추천 빵집",
@@ -257,7 +257,7 @@ class _HomePageState extends State<HomePage> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(5),
         boxShadow: [
           BoxShadow(
@@ -362,19 +362,28 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildRecentRecordsList(TextTheme textTheme) {
+  Widget _buildRecentRecordsList(TextTheme textTheme, ColorScheme colorScheme) {
     // 메인 홈에서는 최근 3개만 표시
     final displayRecords = _allRecords.take(3).toList();
+
+    if (displayRecords.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          child: Text("기록이 없습니다.", style: textTheme.bodySmall),
+        ),
+      );
+    }
 
     return Column(
       children: List.generate(displayRecords.length, (index) {
         final record = displayRecords[index];
         return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.only(bottom: 8.0),
           child: Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.grey[50],
+              color: colorScheme.surface.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(5),
             ),
             child: Row(
@@ -475,9 +484,10 @@ class _HomePageState extends State<HomePage> {
           return Container(
             width: 200,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: colorScheme.surface,
               borderRadius: BorderRadius.circular(5),
-              border: Border.all(color: Colors.grey[100]!),
+              border: Border.all(
+                  color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withAlpha(30),
