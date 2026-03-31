@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:bread_road/ui/pages/post/post_page.dart';
-import 'package:bread_road/ui/pages/record/record_page.dart';
-import 'package:bread_road/ui/pages/write/write_page.dart';
-import 'package:bread_road/ui/widgets/bottom_navigation_bar.dart';
+import '../write/write_page.dart';
+import '../post/post_page.dart';
+import '../record/record_page.dart';
+import '../../widgets/bread_record_card.dart';
+import '../../widgets/recommended_bakery_card.dart';
+import '../../widgets/bottom_navigation_bar.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -12,87 +14,66 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  // 바텀네비게이션바 컨트롤러
   int _currentIndex = 0;
   final PageController _pageController = PageController();
 
-  // 전체 기록 데이터. 화면에서 3개 목록만 보여줌 나머지는 (더보기+)를 통하거나 레코드페이지에서 전체리스트 확인 가능
+  // 가상의 데이터 (추후 Firebase 연동)
   final List<Map<String, dynamic>> _allRecords = [
     {
-      "name": "바게트 샌드위치",
-      "bakery": "건강한 빵집",
-      "rating": "4.5",
-      "isFavorite": false,
+      "name": "성심당 튀김소보로",
+      "date": "2024-03-25",
+      "time": "14:30",
+      "rating": 4.5,
+      "isFavorite": true,
+      "images": [
+        "https://picsum.photos/200/200?random=1",
+        "https://picsum.photos/200/200?random=2",
+        "https://picsum.photos/200/200?random=3",
+      ],
+      "bakery": "성심당 본점",
+      "location": "대전 중구",
+      "description": "역시 명불허전... 바삭하고 달콤해요.",
     },
-    {"name": "크로와상", "bakery": "빵빵한 빵집", "rating": "4.5", "isFavorite": false},
-    {"name": "치아바타", "bakery": "숲속 베이커리", "rating": "4.8", "isFavorite": false},
+    {
+      "name": "연유 크림빵",
+      "date": "2024-03-24",
+      "time": "10:00",
+      "rating": 4.0,
+      "isFavorite": false,
+      "images": [], // 이미지 없음 예시
+      "bakery": "동네 빵집",
+      "location": "서울 성동구",
+      "description": "부드럽고 달콤한 연유 크림이 가득해요.",
+    },
   ];
 
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
+  // 추천 데이터 (추후 Firebase 연동)
+  final Map<String, dynamic>? _recommendationData = {
+    "name": "초코 소라빵",
+    "imageUrl": "https://picsum.photos/400/220?random=10",
+  };
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+    _pageController.jumpToPage(index);
   }
 
-  // 손가락 터치시에도 화면 직접 밀면 바텀바 아이콘 바뀜
   void _onPageChanged(int index) {
     setState(() {
       _currentIndex = index;
     });
   }
 
-  // 화면 넘기는 리모컨
-  void _onItemTapped(int index) {
-    _pageController.animateToPage(
-      index,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeIn,
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-    final colorScheme = theme.colorScheme;
-
-    return Scaffold(
-      backgroundColor: colorScheme.surface,
-      body: PageView(
-        controller: _pageController,
-        onPageChanged: _onPageChanged,
-        children: [
-          _buildHomeView(textTheme, colorScheme),
-          _buildPlaceholderView("추천 빵집", Icons.bakery_dining, textTheme),
-          // 3. 내 기록 탭에 실제 구현한 RecordPage를 연결.
-          RecordPage(
-            records: _allRecords,
-            onRecordUpdated: (index, result) {
-              if (result != null) {
-                _handleRecordResult(index, result);
-              }
-            },
-          ),
-          _buildPlaceholderView("레시피", Icons.restaurant_menu, textTheme),
-          _buildPlaceholderView("내 설정", Icons.person, textTheme),
-        ],
-      ),
-      bottomNavigationBar: CustomBottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: _onItemTapped,
-      ),
-    );
-  }
-
-  // 메인 홈 화면 UI
   Widget _buildHomeView(TextTheme textTheme, ColorScheme colorScheme) {
     return SafeArea(
       child: Column(
         children: [
-          // 1. 고정된 상단 헤더 영역 (Sticky Header) - 그림자 효과 추가
+          // 1. 고정된 상단 헤더 영역
           Container(
             decoration: BoxDecoration(
-              color: colorScheme.surface,
+              color: const Color(0xFFF5F5F5), // 라이트 그레이 배경
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.05),
@@ -129,14 +110,11 @@ class _HomePageState extends State<HomePage> {
                           }
 
                           if (result is Map<String, dynamic>) {
-                            // 새로 작성 시 전체 리스트 처음에 추가
                             if (result["isDeleted"] != true) {
                               _allRecords.insert(
                                 0,
                                 Map<String, dynamic>.from(result),
                               );
-
-                              // 작성 후 즉시 내 기록 탭으로 이동하고 싶을 경우
                               _onItemTapped(2);
                             }
                           }
@@ -154,53 +132,69 @@ class _HomePageState extends State<HomePage> {
           // 2. 스크롤 가능한 본문 영역
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 10),
-                  Text(
-                    "오늘의 빵 기록",
-                    style: textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
+                  // 1) 오늘의 빵 추천 영역 (가로 꽉 차게)
+                  _buildRecommendationArea(textTheme, colorScheme),
+
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 40),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "최근 기록",
+                              style: textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () => _onItemTapped(2),
+                              child: Text(
+                                "+ 더보기",
+                                style: textTheme.bodySmall?.copyWith(
+                                  color: Colors.grey[600],
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        _buildRecentRecordsList(textTheme, colorScheme),
+                        const SizedBox(height: 40),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "추천 빵집",
+                              style: textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () => _onItemTapped(1),
+                              child: Text(
+                                "+ 더보기",
+                                style: textTheme.bodySmall?.copyWith(
+                                  color: Colors.grey[600],
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        _buildRecommendedBakeries(textTheme, colorScheme),
+                        const SizedBox(height: 40),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  _buildTodayBreadCard(textTheme, colorScheme),
-                  const SizedBox(height: 40),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "최근 기록",
-                        style: textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () => _onItemTapped(2),
-                        child: Text(
-                          "+ 더보기",
-                          style: textTheme.bodySmall?.copyWith(
-                            color: Colors.grey[600],
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  _buildRecentRecordsList(textTheme, colorScheme),
-                  const SizedBox(height: 40),
-                  Text(
-                    "추천 빵집",
-                    style: textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  _buildRecommendedBakeries(textTheme, colorScheme),
-                  const SizedBox(height: 40),
                 ],
               ),
             ),
@@ -210,149 +204,99 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildPlaceholderView(
-    String title,
-    IconData icon,
+  /// ── 오늘의 빵 추천 영역 ──
+  Widget _buildRecommendationArea(
     TextTheme textTheme,
+    ColorScheme colorScheme,
   ) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 80, color: Colors.grey[300]),
-          const SizedBox(height: 16),
-          Text(
-            title,
-            style: textTheme.headlineSmall?.copyWith(
-              color: Colors.grey[400],
-              fontWeight: FontWeight.bold,
-            ),
+    if (_recommendationData == null) {
+      return Container(
+        width: double.infinity,
+        height: 200,
+        decoration: const BoxDecoration(color: Colors.white),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.bakery_dining,
+                size: 48,
+                color: colorScheme.primary.withValues(alpha: 0.5),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Bread Road',
+                style: textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: -0.5,
+                  color: colorScheme.primary.withValues(alpha: 0.5),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
-          Text(
-            "페이지 준비 중입니다.",
-            style: textTheme.bodyMedium?.copyWith(color: Colors.grey),
-          ),
-        ],
-      ),
-    );
-  }
+        ),
+      );
+    }
 
-  Widget _buildTodayBreadCard(TextTheme textTheme, ColorScheme colorScheme) {
-    final latestRecord = _allRecords.isNotEmpty
-        ? _allRecords.first
-        : {
-            "name": "오늘의 빵",
-            "bakery": "비어있음",
-            "rating": "0.0",
-            "isFavorite": false,
-          };
-
-    final String name = latestRecord["name"] ?? "오늘의 빵";
-    final String bakery = latestRecord["bakery"] ?? "비어있음";
-    final double rating =
-        double.tryParse(latestRecord["rating"].toString()) ?? 0.0;
-    final bool isFavorite = latestRecord["isFavorite"] == true;
+    final String name = _recommendationData["name"] ?? "";
+    final String? imageUrl = _recommendationData["imageUrl"];
 
     return Container(
       width: double.infinity,
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(5),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha(30),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      height: 220,
+      child: Stack(
         children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(5)),
+          Positioned.fill(
+            child: imageUrl != null
+                ? Image.network(imageUrl, fit: BoxFit.cover)
+                : Container(color: Colors.grey[200]),
+          ),
+          Positioned.fill(
             child: Container(
-              height: 200,
-              width: double.infinity,
-              color: Colors.grey[100],
-              child: const Icon(
-                Icons.bakery_dining,
-                size: 64,
-                color: Colors.grey,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withValues(alpha: 0.1),
+                    Colors.black.withValues(alpha: 0.6),
+                  ],
+                ),
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Positioned(
+            left: 20,
+            bottom: 20,
+            right: 20,
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        bakery,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: textTheme.titleMedium?.copyWith(
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ],
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colorScheme.primary,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: const Text(
+                    "오늘의 추천",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-                const SizedBox(width: 16),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    // 5. 별점 (0.5 단위 반쪽 별 지원)
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: List.generate(5, (index) {
-                        IconData iconData = Icons.star_border;
-                        Color iconColor = Colors.grey[300]!;
-
-                        if (rating >= index + 1) {
-                          iconData = Icons.star;
-                          iconColor = Colors.amber;
-                        } else if (rating > index) {
-                          iconData = Icons.star_half;
-                          iconColor = Colors.amber;
-                        }
-
-                        return Icon(iconData, size: 18, color: iconColor);
-                      }),
-                    ),
-                    const SizedBox(height: 4),
-                    IconButton(
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                      onPressed: () {
-                        if (_allRecords.isNotEmpty) {
-                          setState(() {
-                            _allRecords[0]["isFavorite"] = !isFavorite;
-                          });
-                        }
-                      },
-                      icon: Icon(
-                        isFavorite ? Icons.favorite : Icons.favorite_border,
-                        color: isFavorite ? Colors.red : Colors.grey,
-                        size: 24,
-                      ),
-                    ),
-                  ],
+                const SizedBox(height: 8),
+                Text(
+                  name,
+                  style: textTheme.headlineSmall?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -362,220 +306,153 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  /// ── 최근 기록 리스트 ──
   Widget _buildRecentRecordsList(TextTheme textTheme, ColorScheme colorScheme) {
-    // 메인 홈에서는 최근 3개만 표시
-    final displayRecords = _allRecords.take(3).toList();
-
-    if (displayRecords.isEmpty) {
+    if (_allRecords.isEmpty) {
       return Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 20),
-          child: Text("기록이 없습니다.", style: textTheme.bodySmall),
+        child: Container(
+          width: double.infinity,
+          margin: const EdgeInsets.symmetric(vertical: 20),
+          padding: const EdgeInsets.all(40),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey[200]!),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.history_toggle_off, size: 60, color: Colors.grey[300]),
+              const SizedBox(height: 16),
+              Text(
+                "오늘 먹은 빵을 기록해 주세요.",
+                style: textTheme.bodyLarge?.copyWith(
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
         ),
       );
     }
 
     return Column(
-      children: List.generate(displayRecords.length, (index) {
-        final record = displayRecords[index];
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 8.0),
-          child: Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: colorScheme.surface.withValues(alpha: 0.5),
-              borderRadius: BorderRadius.circular(5),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  child: const Icon(Icons.image, color: Colors.grey),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        record["name"] ?? "",
-                        style: textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      // 별점 (0.5 단위 반쪽 별 지원)
-                      Row(
-                        children: [
-                          Text(
-                            "${record["bakery"]}  ",
-                            style: textTheme.bodySmall?.copyWith(
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                          ...List.generate(5, (index) {
-                            final double r =
-                                double.tryParse(record["rating"].toString()) ??
-                                0.0;
-                            IconData iconData = Icons.star_border;
-                            Color iconColor = Colors.grey[300]!;
-
-                            if (r >= index + 1) {
-                              iconData = Icons.star;
-                              iconColor = Colors.amber;
-                            } else if (r > index) {
-                              iconData = Icons.star_half;
-                              iconColor = Colors.amber;
-                            }
-
-                            return Icon(iconData, size: 12, color: iconColor);
-                          }),
-                          Text(
-                            " ${record["rating"]}",
-                            style: textTheme.bodySmall?.copyWith(
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                IconButton(
-                  onPressed: () async {
-                    final result = await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => PostPage(data: record),
-                      ),
-                    );
-
-                    if (result != null) {
-                      _handleRecordResult(index, result);
-                    }
-                  },
-                  icon: const Icon(Icons.chevron_right, color: Colors.grey),
-                ),
-              ],
-            ),
-          ),
+      children: _allRecords.take(3).map((record) {
+        return BreadRecordCard(
+          record: record,
+          onTap: () async {
+            final result = await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => PostPage(record: record)),
+            );
+            if (result != null && result is Map<String, dynamic>) {
+              setState(() {
+                final updatedData = result["data"] ?? result;
+                if (result["isDeleted"] == true) {
+                  _allRecords.remove(record);
+                } else {
+                  final index = _allRecords.indexOf(record);
+                  if (index != -1) {
+                    _allRecords[index] = Map<String, dynamic>.from(updatedData);
+                  }
+                }
+              });
+            }
+          },
+          onFavoriteToggle: () {
+            setState(() {
+              record["isFavorite"] = !(record["isFavorite"] ?? false);
+            });
+          },
         );
-      }),
+      }).toList(),
     );
   }
 
+  /// ── 추천 빵집 섹션 ──
   Widget _buildRecommendedBakeries(
     TextTheme textTheme,
     ColorScheme colorScheme,
   ) {
+    final bakeries = [
+      {
+        "name": "오베르망",
+        "location": "서울 성북구",
+        "rating": 4.8,
+        "reviews": 124,
+        "imageUrl": "https://picsum.photos/160/120?random=20",
+      },
+      {
+        "name": "밀곳간",
+        "location": "서울 성동구",
+        "rating": 4.6,
+        "reviews": 89,
+        "imageUrl": "https://picsum.photos/160/120?random=21",
+      },
+      {
+        "name": "런던 베이글",
+        "location": "서울 종로구",
+        "rating": 4.9,
+        "reviews": 350,
+        "imageUrl": "https://picsum.photos/160/120?random=22",
+      },
+    ];
+
     return SizedBox(
       height: 210,
-      child: ListView.separated(
-        padding: const EdgeInsets.only(right: 20),
+      child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: 5,
-        separatorBuilder: (context, index) => const SizedBox(width: 16),
+        itemCount: bakeries.length,
         itemBuilder: (context, index) {
-          return Container(
-            width: 200,
-            decoration: BoxDecoration(
-              color: colorScheme.surface,
-              borderRadius: BorderRadius.circular(5),
-              border: Border.all(
-                  color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withAlpha(30),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(5),
-                  ),
-                  child: Container(
-                    height: 110,
-                    width: double.infinity,
-                    color: Colors.grey[100],
-                    child: const Center(
-                      child: Icon(
-                        Icons.storefront,
-                        size: 40,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "맛있는 빵집 ${index + 1}",
-                        style: textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          const Icon(Icons.star, size: 14, color: Colors.amber),
-                          Text(
-                            " 4.9",
-                            style: textTheme.bodySmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            "| 서울 강남구 역삼동",
-                            style: textTheme.bodySmall?.copyWith(
-                              color: Colors.grey,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+          return RecommendedBakeryCard(
+            bakery: bakeries[index],
+            onTap: () {
+              // 빵집 상세 또는 검색 등으로 연결 가능 (현재는 미구현)
+            },
           );
         },
       ),
     );
   }
 
-  // 5. 기록 수정/삭제 결과를 통합 처리하는 함수
-  void _handleRecordResult(int index, dynamic result) {
-    if (result is Map<String, dynamic>) {
-      setState(() {
-        if (result["isDeleted"] == true) {
-          _allRecords.removeAt(index);
-        } else {
-          final updatedData = result["data"] as Map<String, dynamic>? ?? result;
-          _allRecords[index] = Map<String, dynamic>.from(updatedData);
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
 
-          // PostPage에서 뒤로가기 시 goToRecord 플래그가 있으면 '내 기록' 탭으로 전환
-          if (result["goToRecord"] == true) {
-            _onItemTapped(2);
-          }
-        }
-      });
-    }
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F5F5),
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: _onPageChanged,
+        children: [
+          _buildHomeView(textTheme, colorScheme),
+          const Center(child: Text("지도 페이지 준비 중")),
+          RecordPage(
+            records: _allRecords,
+            onRecordUpdated: (index, result) {
+              if (result != null && result is Map<String, dynamic>) {
+                setState(() {
+                  final updatedData = result["data"] ?? result;
+                  if (result["isDeleted"] == true) {
+                    _allRecords.removeAt(index);
+                  } else {
+                    _allRecords[index] = Map<String, dynamic>.from(updatedData);
+                  }
+                });
+              }
+            },
+            onBackToHome: () => _onItemTapped(0),
+          ),
+          const Center(child: Text("설정 페이지 준비 중")),
+        ],
+      ),
+      bottomNavigationBar: CustomBottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: _onItemTapped,
+      ),
+    );
   }
 }

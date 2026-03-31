@@ -1,18 +1,17 @@
 import 'package:bread_road/ui/pages/post/post_page.dart';
-import 'package:bread_road/ui/widgets/app_bar_widget.dart';
+import 'package:bread_road/ui/widgets/bread_record_card.dart';
 import 'package:flutter/material.dart';
 
-// postPage에서 뒤로가기를 누르면 레코드페이지로 넘어오기
 class RecordPage extends StatefulWidget {
-  // 1. 전체 기록 리스트를 생성자로 전달받는다.
   final List<Map<String, dynamic>> records;
-  // 2. 리스트가 변경되었을 때 상위 페이지(home_page)의 상태를 업데이트하기 위한 콜백 함수
   final Function(int index, dynamic result) onRecordUpdated;
+  final VoidCallback onBackToHome;
 
   const RecordPage({
     super.key,
     required this.records,
     required this.onRecordUpdated,
+    required this.onBackToHome,
   });
 
   @override
@@ -20,153 +19,163 @@ class RecordPage extends StatefulWidget {
 }
 
 class _RecordPageState extends State<RecordPage> {
+  int _selectedMonth = 0; // 0: 전체, 1~12: 각 월
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
+
+    // 최신기록이 위로 오도록 리버싱 기반 필터링
+    final reversedRecords = widget.records.reversed.toList();
+
+    final filteredRecords = _selectedMonth == 0
+        ? reversedRecords
+        : reversedRecords.where((record) {
+            final dateStr = record["visitDate"] ?? record["date"] ?? "";
+            if (dateStr.isEmpty) return false;
+            try {
+              final month = int.parse(dateStr.split("-")[1]);
+              return month == _selectedMonth;
+            } catch (_) {
+              return false;
+            }
+          }).toList();
 
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: const AppBarWidget(
-        title: '내 기록',
-        showBack: false, // 탭 내부 페이지이므로 뒤로가기 버튼 비활성화
-      ),
-      // 3. 기록이 있으면 리스트를 보여주고, 없으면 빈 화면
-      body: widget.records.isEmpty
-          ? _buildEmptyView(textTheme)
-          : ListView.separated(
-              padding: const EdgeInsets.all(20),
-              itemCount: widget.records.length,
-              separatorBuilder: (context, index) => const SizedBox(height: 12),
-              itemBuilder: (context, index) {
-                final record = widget.records[index];
-                return _buildRecordItem(record, index, textTheme);
-              },
-            ),
-    );
-  }
-
-  // 데이터가 없을 때 표시할 화면 (오늘의 빵이 비어있을 때)
-  Widget _buildEmptyView(TextTheme textTheme) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.auto_stories_outlined, size: 80, color: Colors.grey[300]),
-          const SizedBox(height: 16),
-          Text(
-            "아직 작성된 기록이 없습니다.",
-            style: textTheme.bodyLarge?.copyWith(color: Colors.grey),
+      backgroundColor: const Color(0xFFF5F5F5),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFFF5F5F5),
+        elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: widget.onBackToHome,
+        ),
+        title: Text(
+          '내 기록',
+          style: textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
           ),
-          const SizedBox(height: 8),
-          Text(
-            "오늘 먹은 빵을 기록해보세요!",
-            style: textTheme.bodyMedium?.copyWith(color: Colors.grey[400]),
+        ),
+      ),
+      body: Column(
+        children: [
+          _buildMonthFilter(colorScheme, textTheme),
+          Expanded(
+            child: filteredRecords.isEmpty
+                ? _buildEmptyView(textTheme)
+                : ListView.builder(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 10,
+                    ),
+                    itemCount: filteredRecords.length,
+                    itemBuilder: (context, index) {
+                      final record = filteredRecords[index];
+                      final originalIndex = widget.records.indexOf(record);
+                      return BreadRecordCard(
+                        record: record,
+                        onTap: () async {
+                          final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => PostPage(record: record),
+                            ),
+                          );
+                          widget.onRecordUpdated(originalIndex, result);
+                        },
+                        onFavoriteToggle: () {
+                          setState(() {
+                            record["isFavorite"] =
+                                !(record["isFavorite"] ?? false);
+                          });
+                          // 원본 데이터 동기화를 위해 부모 위젯에 알림
+                          widget.onRecordUpdated(
+                            originalIndex,
+                            Map<String, dynamic>.from(record),
+                          );
+                        },
+                      );
+                    },
+                  ),
           ),
         ],
       ),
     );
   }
 
-  // 4. 홈 페이지의 리스트 스타일을 그대로 갖고옴
-  Widget _buildRecordItem(
-    Map<String, dynamic> record,
-    int index,
-    TextTheme textTheme,
-  ) {
-    final theme = Theme.of(context);
-    return GestureDetector(
-      onTap: () async {
-        // 상세 페이지로 이동하고, 거기서 수정한 정보를 결과값으로 받아온다.
-        final result = await Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => PostPage(data: record)),
-        );
-        // 결과가 있다면 (수정되거나 삭제되었다면) 상위 HomePage로 정보를 전달합니다.
-        widget.onRecordUpdated(index, result);
-      },
+  Widget _buildMonthFilter(ColorScheme colorScheme, TextTheme textTheme) {
+    return Container(
+      height: 60,
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: 13,
+        itemBuilder: (context, index) {
+          final isSelected = _selectedMonth == index;
+          final String label = index == 0 ? "전체" : "$index월";
+
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: ChoiceChip(
+              label: Text(label),
+              selected: isSelected,
+              onSelected: (selected) {
+                if (selected) {
+                  setState(() => _selectedMonth = index);
+                }
+              },
+              selectedColor: colorScheme.primary,
+              backgroundColor: Colors.white,
+              labelStyle: TextStyle(
+                color: isSelected ? Colors.white : Colors.grey[700],
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                fontSize: 13,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+                side: BorderSide(
+                  color: isSelected ? colorScheme.primary : Colors.grey[300]!,
+                ),
+              ),
+              showCheckmark: false,
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildEmptyView(TextTheme textTheme) {
+    return Center(
       child: Container(
-        padding: const EdgeInsets.all(12),
+        margin: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(40),
         decoration: BoxDecoration(
-          color: theme.colorScheme.surface.withValues(alpha: 0.5), // 테마 기반 반투명 배경
-          borderRadius: BorderRadius.circular(5),
-          border: Border.all(color: Colors.grey[100]!),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey[200]!),
         ),
-        child: Row(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            // 빵 이미지 영역 (현재는 임시 아이콘)
-            Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(5),
-              ),
-              child: const Icon(
-                Icons.bakery_dining_outlined,
-                color: Colors.grey,
+            Icon(Icons.history_toggle_off, size: 60, color: Colors.grey[300]),
+            const SizedBox(height: 16),
+            Text(
+              "오늘 먹은 빵을 기록해 주세요.",
+              style: textTheme.bodyLarge?.copyWith(
+                color: Colors.grey[600],
+                fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(width: 16),
-            // 텍스트 정보 영역 (제품명, 가게명, 별점)
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    record["name"] ?? "제품명 없음",
-                    style: textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Text(
-                        record["bakery"] ?? "가게 정보 없음",
-                        style: textTheme.bodySmall?.copyWith(
-                          color: Colors.grey[600],
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(width: 8),
-                      // 별점 (0.5 단위 반쪽 별 지원)
-                      ...List.generate(5, (index) {
-                        final double r =
-                            double.tryParse(record["rating"].toString()) ?? 0.0;
-                        IconData iconData = Icons.star_border;
-                        Color iconColor = Colors.grey[300]!;
-
-                        if (r >= index + 1) {
-                          iconData = Icons.star;
-                          iconColor = Colors.amber;
-                        } else if (r > index) {
-                          iconData = Icons.star_half;
-                          iconColor = Colors.amber;
-                        }
-
-                        return Icon(iconData, size: 12, color: iconColor);
-                      }),
-                      const SizedBox(width: 4),
-                      Text(
-                        "${record["rating"] ?? '0.0'}",
-                        style: textTheme.bodySmall?.copyWith(
-                          color: Colors.amber[700],
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
           ],
         ),
       ),
     );
   }
+
 }

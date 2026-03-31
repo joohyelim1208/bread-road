@@ -47,12 +47,12 @@ class AppTextTheme {
   // 라이트 모드용 테마
   static TextTheme lightTextTheme = _buildTextTheme(
     Colors.black87,
-    Colors.grey[600]!,
+    const Color(0xFF424242), // 더 진한 회색으로 변경하여 가독성 업그레이드
   );
 
   // 다크 모드용 테마
   static TextTheme darkTextTheme = _buildTextTheme(
     Colors.white,
-    Colors.grey[400]!,
+    Colors.grey[200]!, // 더 밝은 회색으로 변경
   );
 }

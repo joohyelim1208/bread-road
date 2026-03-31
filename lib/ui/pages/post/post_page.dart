@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class PostPage extends StatefulWidget {
-  final Map<String, dynamic> data;
+  final Map<String, dynamic> record;
 
-  const PostPage({super.key, required this.data});
+  const PostPage({super.key, required this.record});
 
   @override
   State<PostPage> createState() => _PostPageState();
@@ -16,18 +16,18 @@ class PostPage extends StatefulWidget {
 class _PostPageState extends State<PostPage> {
   bool _isFavorite = false;
   // 1. 현재 페이지에서 보여줄 데이터 상태를 별도로 관리
-  late Map<String, dynamic> _currentData;
+  late Map<String, dynamic> _currentRecord;
 
   @override
   void initState() {
     super.initState();
-    _currentData = widget.data;
-    _isFavorite = _currentData['isFavorite'] ?? false;
+    _currentRecord = widget.record;
+    _isFavorite = _currentRecord['isFavorite'] ?? false;
   }
 
   @override
   Widget build(BuildContext context) {
-    final data = _currentData;
+    final record = _currentRecord;
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
 
@@ -36,7 +36,7 @@ class _PostPageState extends State<PostPage> {
       appBar: AppBarWidget(
         title: '내 기록',
         onBackPressed: () =>
-            Navigator.pop(context, {"data": _currentData, "goToRecord": true}),
+            Navigator.pop(context, {"data": _currentRecord, "goToRecord": true}),
         actions: [
           IconButton(
             icon: Icon(
@@ -46,7 +46,7 @@ class _PostPageState extends State<PostPage> {
             onPressed: () {
               setState(() {
                 _isFavorite = !_isFavorite;
-                _currentData['isFavorite'] = _isFavorite;
+                _currentRecord['isFavorite'] = _isFavorite;
               });
             },
           ),
@@ -97,14 +97,14 @@ class _PostPageState extends State<PostPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "${data['mainType'] ?? '분류없음'} / ${data['subCategory'] ?? '소분류없음'}",
+                    "${record['mainType'] ?? '분류없음'} / ${record['subCategory'] ?? '소분류없음'}",
                     style: textTheme.bodyMedium?.copyWith(
                       color: Colors.grey[600],
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    data['name'] ?? '제품명 없음',
+                    record['name'] ?? '제품명 없음',
                     style: textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -117,7 +117,7 @@ class _PostPageState extends State<PostPage> {
                         children: List.generate(5, (index) {
                           double rating =
                               double.tryParse(
-                                data['rating']?.toString() ?? '0',
+                                record['rating']?.toString() ?? '0',
                               ) ??
                               0;
                           IconData iconData = Icons.star_border;
@@ -136,7 +136,7 @@ class _PostPageState extends State<PostPage> {
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        "총점 ${double.tryParse(data['rating']?.toString() ?? '0')?.toStringAsFixed(1) ?? '0.0'}",
+                        "총점 ${double.tryParse(record['rating']?.toString() ?? '0')?.toStringAsFixed(1) ?? '0.0'}",
                         style: textTheme.bodyMedium?.copyWith(
                           color: Colors.grey,
                         ),
@@ -154,7 +154,7 @@ class _PostPageState extends State<PostPage> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          data['bakery'] ?? '가게명 없음',
+                          record['bakery'] ?? '가게명 없음',
                           style: textTheme.bodyLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -205,7 +205,7 @@ class _PostPageState extends State<PostPage> {
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        _formatDate(data['visitDate'] ?? ''),
+                        _formatDate(record['visitDate'] ?? ''),
                         style: textTheme.bodyLarge,
                       ),
                     ],
@@ -227,7 +227,7 @@ class _PostPageState extends State<PostPage> {
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        (data['isScheduled'] == false) ? "시식완료" : "시식예정",
+                        (record['isScheduled'] == false) ? "시식완료" : "시식예정",
                         style: textTheme.bodyLarge,
                       ),
                     ],
@@ -235,7 +235,7 @@ class _PostPageState extends State<PostPage> {
                   const SizedBox(height: 16),
                   const Divider(),
                   const SizedBox(height: 24),
-                  _buildSensoryEvaluation(data, textTheme),
+                  _buildSensoryEvaluation(record, textTheme),
                   const Divider(),
                   const SizedBox(height: 24),
                   Text(
@@ -246,7 +246,7 @@ class _PostPageState extends State<PostPage> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    data['content'] ?? '상세 설명이 없습니다.',
+                    record['content'] ?? '상세 설명이 없습니다.',
                     style: textTheme.bodyMedium?.copyWith(
                       fontSize: 14,
                       color: Colors.black87,
@@ -269,12 +269,12 @@ class _PostPageState extends State<PostPage> {
           final result = await Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => WritePage(initialData: _currentData),
+              builder: (context) => WritePage(initialData: _currentRecord),
             ),
           );
           if (result != null && mounted) {
             setState(() {
-              _currentData = result as Map<String, dynamic>;
+              _currentRecord = result as Map<String, dynamic>;
             });
           }
         },
@@ -283,32 +283,32 @@ class _PostPageState extends State<PostPage> {
   }
 
   Widget _buildSensoryEvaluation(
-    Map<String, dynamic> data,
+    Map<String, dynamic> record,
     TextTheme textTheme,
   ) {
     return Column(
       children: [
         _buildSensoryRow(
           "맛",
-          (data['tastes'] as List?)?.map((e) => e.toString()).toList() ?? [],
+          (record['tastes'] as List?)?.map((e) => e.toString()).toList() ?? [],
           textTheme,
         ),
         const SizedBox(height: 16),
         _buildSensoryRow(
           "풍미",
-          data['flavor'] != null ? [data['flavor'].toString()] : [],
+          record['flavor'] != null ? [record['flavor'].toString()] : [],
           textTheme,
         ),
         const SizedBox(height: 16),
         _buildSensoryRow(
           "향",
-          (data['scents'] as List?)?.map((e) => e.toString()).toList() ?? [],
+          (record['scents'] as List?)?.map((e) => e.toString()).toList() ?? [],
           textTheme,
         ),
         const SizedBox(height: 16),
         _buildSensoryRow(
           "식감",
-          (data['textures'] as List?)?.map((e) => e.toString()).toList() ?? [],
+          (record['textures'] as List?)?.map((e) => e.toString()).toList() ?? [],
           textTheme,
         ),
         const SizedBox(height: 24),

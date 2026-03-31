@@ -242,6 +242,7 @@ class _WritePageState extends State<WritePage> {
               "content": _contentController.text,
               // 저장하기의 맵에서 요일 정보 없이 이 형식으로만 저장
               "visitDate": DateFormat('yyyy-MM-dd').format(_selectedDate),
+              "location": "서울 시군구",
             };
             Navigator.pop(context, recordData);
           },
