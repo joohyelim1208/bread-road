@@ -121,7 +121,7 @@ class _HomePageState extends State<HomePage> {
                         });
                       }
                     },
-                    icon: const Icon(Icons.add_circle, size: 32),
+                    icon: const Icon(Icons.add_circle, size: 40),
                     color: colorScheme.primary,
                   ),
                 ],
@@ -444,7 +444,6 @@ class _HomePageState extends State<HomePage> {
                 });
               }
             },
-            onBackToHome: () => _onItemTapped(0),
           ),
           const Center(child: Text("설정 페이지 준비 중")),
         ],

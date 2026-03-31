@@ -5,13 +5,11 @@ import 'package:flutter/material.dart';
 class RecordPage extends StatefulWidget {
   final List<Map<String, dynamic>> records;
   final Function(int index, dynamic result) onRecordUpdated;
-  final VoidCallback onBackToHome;
 
   const RecordPage({
     super.key,
     required this.records,
     required this.onRecordUpdated,
-    required this.onBackToHome,
   });
 
   @override
@@ -49,10 +47,6 @@ class _RecordPageState extends State<RecordPage> {
         backgroundColor: const Color(0xFFF5F5F5),
         elevation: 0,
         centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: widget.onBackToHome,
-        ),
         title: Text(
           '내 기록',
           style: textTheme.titleMedium?.copyWith(

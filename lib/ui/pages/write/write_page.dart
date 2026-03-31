@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:bread_road/core/enum/write_category_type.dart';
 import 'package:bread_road/core/utils/input_decoration_util.dart';
 import 'package:bread_road/core/utils/button_util.dart';
@@ -6,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:bread_road/core/utils/validator_util.dart';
+import 'package:image_picker/image_picker.dart';
 
 // 저장된 내용은 postPage에 반영이 된다!
 class WritePage extends StatefulWidget {
@@ -44,6 +46,10 @@ class _WritePageState extends State<WritePage> {
 
   // 7번. 방문날짜 캘린더피커. 기본값 오늘날짜
   DateTime _selectedDate = DateTime.now();
+
+  // 사진 목록 상태 추가 (최대 10장)
+  final List<String> _selectedImages = [];
+  final ImagePicker _picker = ImagePicker();
 
   // 날짜 선택 팝업 함수
   Future<void> _selectDate(BuildContext context) async {
@@ -98,6 +104,9 @@ class _WritePageState extends State<WritePage> {
       if (data["textures"] is List) {
         _selectedTextures.addAll((data["textures"] as List).cast<String>());
       }
+      if (data["images"] is List) {
+        _selectedImages.addAll((data["images"] as List).cast<String>());
+      }
     }
   }
 
@@ -140,10 +149,11 @@ class _WritePageState extends State<WritePage> {
 
                     // 2. 카테고리 선택 (가로 스크롤)
                     _buildCategorySelector(colorScheme, textTheme),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 24),
 
-                    // 3. 사진 추가 영역 (비활성화)
-                    const SizedBox(height: 12),
+                    // 3. 사진 추가 영역. +버튼을 누르면 갤러리로 연동되어서 이미지 선택이 가능하게 변경하기! 그리고 카메라로 촬영해서 추가 가능하도록
+                    _buildPhotoArea(colorScheme, textTheme),
+                    const SizedBox(height: 24),
 
                     // 4. 내가 먹은 빵 (제품명) 입력 필드 영역
                     Text(
@@ -223,7 +233,9 @@ class _WritePageState extends State<WritePage> {
           label: "저장하기",
           onTap: () {
             final recordData = {
-              "mainType": _currentType == WriteCategoryType.bread ? "빵류" : "과자류",
+              "mainType": _currentType == WriteCategoryType.bread
+                  ? "빵류"
+                  : "과자류",
               "subCategory": _selectedCategory,
               "name": _nameController.text.isEmpty
                   ? "빵 이름을 등록해주세요."
@@ -243,10 +255,192 @@ class _WritePageState extends State<WritePage> {
               // 저장하기의 맵에서 요일 정보 없이 이 형식으로만 저장
               "visitDate": DateFormat('yyyy-MM-dd').format(_selectedDate),
               "location": "서울 시군구",
+              "images": _selectedImages,
             };
             Navigator.pop(context, recordData);
           },
         ),
+      ),
+    );
+  }
+
+  // 사진 선택 소스 선택 팝업
+  Future<void> _showImageSourceActionSheet(BuildContext context) async {
+    final ImagePicker picker = ImagePicker();
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('갤러리에서 선택하기'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  if (_selectedImages.length >= 10) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('사진은 최대 10장까지 추가할 수 있습니다.')),
+                    );
+                    return;
+                  }
+                  // 여기서 실제로 갤러리를 엽니다!
+                  final XFile? pickedFile =
+                      await picker.pickImage(source: ImageSource.gallery);
+                  if (pickedFile != null) {
+                    setState(() {
+                      _selectedImages.add(pickedFile.path); // 리스트에 경로 추가
+                    });
+                  }
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text('직접 촬영하기'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  if (_selectedImages.length >= 10) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('사진은 최대 10장까지 추가할 수 있습니다.')),
+                    );
+                    return;
+                  }
+                  // 여기서 카메라를 엽니다!
+                  final XFile? pickedFile =
+                      await picker.pickImage(source: ImageSource.camera);
+                  if (pickedFile != null) {
+                    setState(() {
+                      _selectedImages.add(pickedFile.path); // 리스트에 경로 추가
+                    });
+                  }
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // 3. 사진 추가 영역 위젯
+  Widget _buildPhotoArea(ColorScheme colorScheme, TextTheme textTheme) {
+    return SizedBox(
+      height: 80,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children: [
+          // 1) 사진 개수 표시 박스
+          GestureDetector(
+            onTap: () => _showImageSourceActionSheet(context),
+            child: Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.camera_alt,
+                    color: _selectedImages.isEmpty
+                        ? Colors.grey[400]
+                        : colorScheme.primary,
+                    size: 24,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "${_selectedImages.length} / 10",
+                    style: textTheme.labelSmall?.copyWith(
+                      color: _selectedImages.isEmpty
+                          ? Colors.grey[400]
+                          : colorScheme.primary,
+                      fontWeight: _selectedImages.isEmpty
+                          ? FontWeight.normal
+                          : FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+
+          // 2) 실제 추가된 사진 리스트
+          ..._selectedImages.asMap().entries.map((entry) {
+            final index = entry.key;
+            final imagePath = entry.value;
+            return Container(
+              width: 80,
+              height: 80,
+              margin: const EdgeInsets.only(right: 8),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                image: DecorationImage(
+                  image: imagePath.startsWith('http')
+                      ? NetworkImage(imagePath)
+                      : FileImage(File(imagePath)) as ImageProvider,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              child: Stack(
+                children: [
+                  // 삭제 버튼
+                  Positioned(
+                    top: 4,
+                    right: 4,
+                    child: GestureDetector(
+                      onTap: () =>
+                          setState(() => _selectedImages.removeAt(index)),
+                      child: Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: const BoxDecoration(
+                          color: Colors.black54,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.close,
+                          color: Colors.white,
+                          size: 14,
+                        ),
+                      ),
+                    ),
+                  ),
+                  // 대표사진 표시
+                  if (index == 0)
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.6),
+                          borderRadius: const BorderRadius.vertical(
+                            bottom: Radius.circular(8),
+                          ),
+                        ),
+                        child: const Text(
+                          '대표사진',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            );
+          }),
+        ],
       ),
     );
   }
