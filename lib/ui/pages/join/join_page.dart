@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:bread_road/ui/widgets/nickname_text_form_field.dart';
+import 'package:image_picker/image_picker.dart';
 
 class JoinPage extends StatefulWidget {
   const JoinPage({super.key});
@@ -25,9 +26,52 @@ class _JoinPageState extends State<JoinPage> {
     super.dispose();
   }
 
-  // 프로필 이미지(이미지 피커 삭제했으므로 로직 흐름두고, 다시 사용한다면 여기서 수정)
+  // 프로필 이미지 선택 로직
   Future<void> _pickImage() async {
-    print("이미지 선택 호출");
+    final ImagePicker picker = ImagePicker();
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('갤러리에서 선택하기'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  final XFile? pickedFile =
+                      await picker.pickImage(source: ImageSource.gallery);
+                  if (pickedFile != null) {
+                    setState(() {
+                      _profileImage = File(pickedFile.path);
+                    });
+                  }
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text('직접 촬영하기'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  final XFile? pickedFile =
+                      await picker.pickImage(source: ImageSource.camera);
+                  if (pickedFile != null) {
+                    setState(() {
+                      _profileImage = File(pickedFile.path);
+                    });
+                  }
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   // 등록완료. 메시지도 출력

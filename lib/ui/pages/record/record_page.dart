@@ -5,11 +5,13 @@ import 'package:flutter/material.dart';
 class RecordPage extends StatefulWidget {
   final List<Map<String, dynamic>> records;
   final Function(int index, dynamic result) onRecordUpdated;
+  final VoidCallback onAddRecord;
 
   const RecordPage({
     super.key,
     required this.records,
     required this.onRecordUpdated,
+    required this.onAddRecord,
   });
 
   @override
@@ -25,12 +27,12 @@ class _RecordPageState extends State<RecordPage> {
     final textTheme = theme.textTheme;
     final colorScheme = theme.colorScheme;
 
-    // 최신기록이 위로 오도록 리버싱 기반 필터링
-    final reversedRecords = widget.records.reversed.toList();
+    // 최신기록이 위로 오도록 필터링 (HomePage에서 이미 최신순으로 추가되므로 원본 순서 사용)
+    final recordsList = widget.records;
 
     final filteredRecords = _selectedMonth == 0
-        ? reversedRecords
-        : reversedRecords.where((record) {
+        ? recordsList
+        : recordsList.where((record) {
             final dateStr = record["visitDate"] ?? record["date"] ?? "";
             if (dateStr.isEmpty) return false;
             try {
@@ -146,27 +148,32 @@ class _RecordPageState extends State<RecordPage> {
 
   Widget _buildEmptyView(TextTheme textTheme) {
     return Center(
-      child: Container(
-        margin: const EdgeInsets.all(20),
-        padding: const EdgeInsets.all(40),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey[200]!),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.history_toggle_off, size: 60, color: Colors.grey[300]),
-            const SizedBox(height: 16),
-            Text(
-              "오늘 먹은 빵을 기록해 주세요.",
-              style: textTheme.bodyLarge?.copyWith(
-                color: Colors.grey[600],
-                fontWeight: FontWeight.bold,
+      child: GestureDetector(
+        onTap: widget.onAddRecord,
+        child: Container(
+          margin: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(40),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey[200]!),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.history_toggle_off, size: 60, color: Colors.grey[300]),
+              const SizedBox(height: 16),
+              Text(
+                "오늘 먹은 빵 기록이 없어요",
+                style: textTheme.bodyLarge?.copyWith(
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.bold,
+                  decoration: TextDecoration.underline,
+                  decorationColor: Colors.grey[400],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

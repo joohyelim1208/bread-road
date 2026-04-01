@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:bread_road/services/firebase/firebase_google_auth_service.dart';
 import 'package:bread_road/services/firebase/kakao_oidc_auth_service.dart';
 import 'package:bread_road/ui/widgets/social_login_button.dart';
@@ -43,14 +44,10 @@ class _LoginPageState extends State<LoginPage> {
 
     // 현재 위치에서 끝까지 이동
     final maxScroll = _scrollController.position.maxScrollExtent;
-    const duration = Duration(seconds: 360); // 360초 동안 매우 천천히 이동
+    const duration = Duration(seconds: 460); //매우 천천히 이동
 
     _scrollController
-        .animateTo(
-          maxScroll,
-          duration: duration,
-          curve: Curves.linear,
-        )
+        .animateTo(maxScroll, duration: duration, curve: Curves.linear)
         .then((_) {
           if (mounted) {
             // 끝에 도달하면 즉시 처음으로 점프 후 다시 시작
@@ -90,11 +87,9 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
         ),
-        // 2. 전체적인 분위기를 위한 옅은 오버레이 (30%)
+        // 2. 전체적인 분위기를 위한 옅은 오버레이
         Positioned.fill(
-          child: Container(
-            color: Colors.white.withValues(alpha: 0.3),
-          ),
+          child: Container(color: Colors.white.withValues(alpha: 0.7)),
         ),
         // 3. 실제 로그인 UI 콘텐츠
         SafeArea(
@@ -111,7 +106,7 @@ class _LoginPageState extends State<LoginPage> {
                     horizontal: 40,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.8), // 80% 투명도
+                    color: Colors.white.withValues(alpha: 0.8),
                     borderRadius: BorderRadius.circular(28),
                   ),
                   child: Column(
@@ -151,21 +146,26 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 const SizedBox(height: 16),
 
-                //다른 방법으로 로그인
-                SocialLoginButton(
-                  text: '다른 방법으로 로그인하기',
-                  backgroundColor: theme.colorScheme.primary, // 메인 컬러
-                  textColor: theme.colorScheme.onPrimary,
-                  icon: Icons.mail_outline,
-                  onPressed: () => Navigator.pushNamed(context, '/join'),
+                // Apple 로그인
+                SignInWithAppleButton(
+                  text: 'Apple로 로그인',
+                  style: SignInWithAppleButtonStyle.black,
+                  borderRadius: const BorderRadius.all(Radius.circular(26)),
+                  height: 52,
+                  onPressed: () async {
+                    // 로그인 로직 실행
+                    // TODO: AppleAuth 구현 시 연결
+                  },
                 ),
 
                 const SizedBox(height: 24),
 
                 //이미 계정이 있으신가요? (가독성을 위한 흰색 박스 추가)
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 8,
+                    horizontal: 16,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.8),
                     borderRadius: BorderRadius.circular(12),
@@ -176,10 +176,7 @@ class _LoginPageState extends State<LoginPage> {
                     children: [
                       Text(
                         '이미 계정이 있으신가요? ',
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 13,
-                        ),
+                        style: TextStyle(color: Colors.grey[600], fontSize: 13),
                       ),
                       GestureDetector(
                         onTap: _handleCheckExistingLogin,

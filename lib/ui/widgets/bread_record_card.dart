@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 
 class BreadRecordCard extends StatelessWidget {
@@ -163,9 +164,10 @@ class BreadRecordCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(8),
                             image: hasImage
                                 ? DecorationImage(
-                                    image: NetworkImage(
-                                      images[index].toString(),
-                                    ),
+                                    image: images[index].toString().startsWith('http')
+                                        ? NetworkImage(images[index].toString())
+                                        : FileImage(File(images[index].toString()))
+                                            as ImageProvider,
                                     fit: BoxFit.cover,
                                   )
                                 : null,

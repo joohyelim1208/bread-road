@@ -17,11 +17,27 @@ class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
   final PageController _pageController = PageController();
 
+  @override
+  void initState() {
+    super.initState();
+    _sortRecords();
+  }
+
+  void _sortRecords() {
+    setState(() {
+      _allRecords.sort((a, b) {
+        final dateA = a["visitDate"] ?? a["date"] ?? "";
+        final dateB = b["visitDate"] ?? b["date"] ?? "";
+        return dateB.compareTo(dateA); // 내림차순 (최신순)
+      });
+    });
+  }
+
   // 가상의 데이터 (추후 Firebase 연동)
   final List<Map<String, dynamic>> _allRecords = [
     {
       "name": "성심당 튀김소보로",
-      "date": "2024-03-25",
+      "visitDate": "2024-03-25",
       "time": "14:30",
       "rating": 4.5,
       "isFavorite": true,
@@ -36,11 +52,11 @@ class _HomePageState extends State<HomePage> {
     },
     {
       "name": "연유 크림빵",
-      "date": "2024-03-24",
+      "visitDate": "2024-03-24",
       "time": "10:00",
       "rating": 4.0,
       "isFavorite": false,
-      "images": [], // 이미지 없음 예시
+      "images": [],
       "bakery": "동네 빵집",
       "location": "서울 성동구",
       "description": "부드럽고 달콤한 연유 크림이 가득해요.",
@@ -94,33 +110,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                   IconButton(
-                    onPressed: () async {
-                      final result = await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const WritePage(),
-                        ),
-                      );
-
-                      if (result != null) {
-                        setState(() {
-                          if (result is int) {
-                            _onItemTapped(result);
-                            return;
-                          }
-
-                          if (result is Map<String, dynamic>) {
-                            if (result["isDeleted"] != true) {
-                              _allRecords.insert(
-                                0,
-                                Map<String, dynamic>.from(result),
-                              );
-                              _onItemTapped(2);
-                            }
-                          }
-                        });
-                      }
-                    },
+                    onPressed: _navigateToWritePage,
                     icon: const Icon(Icons.add_circle, size: 40),
                     color: colorScheme.primary,
                   ),
@@ -444,6 +434,7 @@ class _HomePageState extends State<HomePage> {
                 });
               }
             },
+            onAddRecord: _navigateToWritePage,
           ),
           const Center(child: Text("설정 페이지 준비 중")),
         ],
@@ -453,5 +444,31 @@ class _HomePageState extends State<HomePage> {
         onTap: _onItemTapped,
       ),
     );
+  }
+
+  Future<void> _navigateToWritePage() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const WritePage(),
+      ),
+    );
+
+    if (result != null) {
+      setState(() {
+        if (result is int) {
+          _onItemTapped(result);
+          return;
+        }
+
+        if (result is Map<String, dynamic>) {
+          if (result["isDeleted"] != true) {
+            _allRecords.add(Map<String, dynamic>.from(result));
+            _sortRecords();
+            _onItemTapped(2);
+          }
+        }
+      });
+    }
   }
 }

@@ -49,7 +49,6 @@ class _WritePageState extends State<WritePage> {
 
   // 사진 목록 상태 추가 (최대 10장)
   final List<String> _selectedImages = [];
-  final ImagePicker _picker = ImagePicker();
 
   // 날짜 선택 팝업 함수
   Future<void> _selectDate(BuildContext context) async {

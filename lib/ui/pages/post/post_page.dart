@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:bread_road/core/utils/button_util.dart';
 import 'package:bread_road/ui/pages/write/write_page.dart';
 import 'package:bread_road/ui/widgets/app_bar_widget.dart';
@@ -17,6 +18,7 @@ class _PostPageState extends State<PostPage> {
   bool _isFavorite = false;
   // 1. 현재 페이지에서 보여줄 데이터 상태를 별도로 관리
   late Map<String, dynamic> _currentRecord;
+  int _currentPage = 0;
 
   @override
   void initState() {
@@ -67,27 +69,67 @@ class _PostPageState extends State<PostPage> {
             // 이미지 영역
             Container(
               width: double.infinity,
-              height: 250,
-              color: Colors.grey[200],
+              height: 300,
+              color: Colors.grey[100],
               child: Stack(
                 children: [
-                  const Center(
-                    child: Icon(Icons.image, size: 70, color: Colors.grey),
-                  ),
-                  Positioned(
-                    bottom: 16,
-                    right: 16,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      child: const Text(
-                        "1 / 10",
-                        style: TextStyle(color: Colors.white, fontSize: 12),
+                  if ((record['images'] as List?)?.isNotEmpty ?? false)
+                    PageView.builder(
+                      itemCount: (record['images'] as List).length,
+                      onPageChanged: (index) {
+                        setState(() {
+                          _currentPage = index;
+                        });
+                      },
+                      itemBuilder: (context, index) {
+                        final String imagePath = record['images'][index].toString();
+                        final bool isNetwork = imagePath.startsWith('http');
+                        return Image(
+                          image: isNetwork
+                              ? NetworkImage(imagePath)
+                              : FileImage(File(imagePath)) as ImageProvider,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                        );
+                      },
+                    )
+                  else
+                    const Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.bakery_dining, size: 80, color: Colors.grey),
+                          SizedBox(height: 12),
+                          Text(
+                            "등록된 사진이 없습니다.",
+                            style: TextStyle(color: Colors.grey, fontSize: 14),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
+                  if ((record['images'] as List?)?.isNotEmpty ?? false)
+                    Positioned(
+                      bottom: 16,
+                      right: 16,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.6),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          "${_currentPage + 1} / ${(record['images'] as List).length}",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
