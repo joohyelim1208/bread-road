@@ -1,6 +1,7 @@
-import 'package:bread_road/ui/pages/post/post_page.dart';
-import 'package:bread_road/ui/widgets/bread_record_card.dart';
 import 'package:flutter/material.dart';
+import 'widgets/month_filter_bar.dart';
+import 'widgets/record_list_view.dart';
+import 'widgets/record_empty_view.dart';
 
 class RecordPage extends StatefulWidget {
   final List<Map<String, dynamic>> records;
@@ -25,7 +26,6 @@ class _RecordPageState extends State<RecordPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
-    final colorScheme = theme.colorScheme;
 
     // 최신기록이 위로 오도록 필터링 (HomePage에서 이미 최신순으로 추가되므로 원본 순서 사용)
     final recordsList = widget.records;
@@ -59,124 +59,23 @@ class _RecordPageState extends State<RecordPage> {
       ),
       body: Column(
         children: [
-          _buildMonthFilter(colorScheme, textTheme),
+          MonthFilterBar(
+            selectedMonth: _selectedMonth,
+            onMonthSelected: (month) {
+              setState(() => _selectedMonth = month);
+            },
+          ),
           Expanded(
             child: filteredRecords.isEmpty
-                ? _buildEmptyView(textTheme)
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 10,
-                    ),
-                    itemCount: filteredRecords.length,
-                    itemBuilder: (context, index) {
-                      final record = filteredRecords[index];
-                      final originalIndex = widget.records.indexOf(record);
-                      return BreadRecordCard(
-                        record: record,
-                        onTap: () async {
-                          final result = await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => PostPage(record: record),
-                            ),
-                          );
-                          widget.onRecordUpdated(originalIndex, result);
-                        },
-                        onFavoriteToggle: () {
-                          setState(() {
-                            record["isFavorite"] =
-                                !(record["isFavorite"] ?? false);
-                          });
-                          // 원본 데이터 동기화를 위해 부모 위젯에 알림
-                          widget.onRecordUpdated(
-                            originalIndex,
-                            Map<String, dynamic>.from(record),
-                          );
-                        },
-                      );
-                    },
+                ? RecordEmptyView(onAddRecord: widget.onAddRecord)
+                : RecordListView(
+                    originalRecords: widget.records,
+                    filteredRecords: filteredRecords,
+                    onRecordUpdated: widget.onRecordUpdated,
                   ),
           ),
         ],
       ),
     );
   }
-
-  Widget _buildMonthFilter(ColorScheme colorScheme, TextTheme textTheme) {
-    return Container(
-      height: 60,
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: 13,
-        itemBuilder: (context, index) {
-          final isSelected = _selectedMonth == index;
-          final String label = index == 0 ? "전체" : "$index월";
-
-          return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: ChoiceChip(
-              label: Text(label),
-              selected: isSelected,
-              onSelected: (selected) {
-                if (selected) {
-                  setState(() => _selectedMonth = index);
-                }
-              },
-              selectedColor: colorScheme.primary,
-              backgroundColor: Colors.white,
-              labelStyle: TextStyle(
-                color: isSelected ? Colors.white : Colors.grey[700],
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                fontSize: 13,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-                side: BorderSide(
-                  color: isSelected ? colorScheme.primary : Colors.grey[300]!,
-                ),
-              ),
-              showCheckmark: false,
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildEmptyView(TextTheme textTheme) {
-    return Center(
-      child: GestureDetector(
-        onTap: widget.onAddRecord,
-        child: Container(
-          margin: const EdgeInsets.all(20),
-          padding: const EdgeInsets.all(40),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey[200]!),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.history_toggle_off, size: 60, color: Colors.grey[300]),
-              const SizedBox(height: 16),
-              Text(
-                "오늘 먹은 빵 기록이 없어요",
-                style: textTheme.bodyLarge?.copyWith(
-                  color: Colors.grey[600],
-                  fontWeight: FontWeight.bold,
-                  decoration: TextDecoration.underline,
-                  decorationColor: Colors.grey[400],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
 }

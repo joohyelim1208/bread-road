@@ -1,7 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:bread_road/ui/widgets/nickname_text_form_field.dart';
-import 'package:image_picker/image_picker.dart';
+import 'widgets/profile_image_picker.dart';
+import 'widgets/join_submit_button.dart';
 
 class JoinPage extends StatefulWidget {
   const JoinPage({super.key});
@@ -11,70 +12,18 @@ class JoinPage extends StatefulWidget {
 }
 
 class _JoinPageState extends State<JoinPage> {
-  // 상태 데이터 직접 선언
   String _nickname = "";
   File? _profileImage;
   bool _isLoading = false;
 
-  // 닉네임 컨트롤러. 초기화. 자식위젯 닉네임텍스트폼필드 연결
   final TextEditingController _nicknameController = TextEditingController();
 
-  // 컨트롤러 삭제
   @override
   void dispose() {
     _nicknameController.dispose();
     super.dispose();
   }
 
-  // 프로필 이미지 선택 로직
-  Future<void> _pickImage() async {
-    final ImagePicker picker = ImagePicker();
-
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (BuildContext context) {
-        return SafeArea(
-          child: Wrap(
-            children: [
-              ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: const Text('갤러리에서 선택하기'),
-                onTap: () async {
-                  Navigator.pop(context);
-                  final XFile? pickedFile =
-                      await picker.pickImage(source: ImageSource.gallery);
-                  if (pickedFile != null) {
-                    setState(() {
-                      _profileImage = File(pickedFile.path);
-                    });
-                  }
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.camera_alt),
-                title: const Text('직접 촬영하기'),
-                onTap: () async {
-                  Navigator.pop(context);
-                  final XFile? pickedFile =
-                      await picker.pickImage(source: ImageSource.camera);
-                  if (pickedFile != null) {
-                    setState(() {
-                      _profileImage = File(pickedFile.path);
-                    });
-                  }
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  // 등록완료. 메시지도 출력
   Future<void> _submitNickname() async {
     if (_nickname.isEmpty) {
       ScaffoldMessenger.of(
@@ -82,20 +31,14 @@ class _JoinPageState extends State<JoinPage> {
       ).showSnackBar(const SnackBar(content: Text("닉네임을 입력해주세요.")));
       return;
     }
-    // 등록
     setState(() => _isLoading = true);
     try {
-      // 실제 등록 로직(서버통신 할 때 로직 구현)
       await Future.delayed(const Duration(seconds: 2));
-      // 비동기 API요청 수행 시 요청 완료되기 전 사용자가 화면을 떠나면 (Dispose) context를 더이상 사용할 수 없어서 에러가 발생
-      // 이를 방지하기 위해 if (!mounted) return; 체크를 반드시 해야됨
       if (!mounted) return;
-      // 성공 시 홈화면으로 이동. 라우트 사용시 Name이 붙어야 스트링타입 쓸 수 있음!
       Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        // 에러발생 시 사용자에게 알림만 주고 조인페이지에 머물러야 함. 등록에러메시지 추가하기기능 검색
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text("닉네임 등록 실패: $e")));
@@ -132,10 +75,15 @@ class _JoinPageState extends State<JoinPage> {
           child: Column(
             children: [
               const SizedBox(height: 40),
-              // 프로필이미지 위젯
-              _buildProfileImage(colorScheme),
+              ProfileImagePicker(
+                initialImage: _profileImage,
+                onImageSelected: (image) {
+                  setState(() {
+                    _profileImage = image;
+                  });
+                },
+              ),
               const SizedBox(height: 48),
-              // 닉네임 입력 위젯
               NickNameTextFormField(
                 nickname: _nickname,
                 controller: _nicknameController,
@@ -146,8 +94,11 @@ class _JoinPageState extends State<JoinPage> {
                 },
               ),
               const SizedBox(height: 10),
-              // 하단 등록하기 버튼 위젯
-              _buildInputButton(colorScheme, textTheme),
+              JoinSubmitButton(
+                text: "등록완료",
+                isLoading: _isLoading,
+                onPressed: _submitNickname,
+              ),
               const SizedBox(height: 20),
               Text(
                 "로그인 정보를 잊으셨나요?\n소셜 로그인 시 더 다양한 기능을 활용하실 수 있습니다.",
@@ -161,100 +112,6 @@ class _JoinPageState extends State<JoinPage> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  // 프로필이미지 위젯
-  Widget _buildProfileImage(ColorScheme colorScheme) {
-    return Center(
-      child: GestureDetector(
-        onTap: _pickImage,
-        child: Stack(
-          alignment: Alignment.bottomRight,
-          children: [
-            Container(
-              width: 140,
-              height: 140,
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.grey[200]!, width: 2),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withAlpha(10),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-                image: _profileImage != null
-                    ? DecorationImage(
-                        image: FileImage(_profileImage!),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
-              ),
-              child: _profileImage == null
-                  ? Icon(
-                      Icons.person_outline,
-                      size: 70,
-                      color: Colors.grey[400],
-                    )
-                  : null,
-            ),
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: colorScheme.primary,
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 2),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withAlpha(10),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: const Icon(
-                Icons.camera_alt,
-                size: 18,
-                color: Colors.white,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInputButton(ColorScheme colorScheme, TextTheme textTheme) {
-    return SizedBox(
-      width: double.infinity,
-      height: 56,
-      child: ElevatedButton(
-        onPressed: _isLoading ? null : _submitNickname,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: colorScheme.primary,
-          foregroundColor: colorScheme.onPrimary,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(28),
-          ),
-        ),
-        child: _isLoading
-            ? const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.white,
-                ),
-              )
-            : const Text(
-                "등록완료",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
       ),
     );
   }
