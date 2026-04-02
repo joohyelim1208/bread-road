@@ -25,7 +25,6 @@ class BreadRatingBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
 
     return Column(
@@ -73,7 +72,7 @@ class BreadRatingBar extends StatelessWidget {
                     "총점 ${rating.toStringAsFixed(1)}",
                     style: textTheme.labelSmall?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: colorScheme.primary,
+                      color: Colors.grey,
                     ),
                   ),
                 ],

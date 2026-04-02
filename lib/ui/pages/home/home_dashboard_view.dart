@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:bread_road/ui/pages/home/widgets/recommendation_banner.dart';
 import 'package:bread_road/ui/pages/home/widgets/section_header.dart';
 import 'package:bread_road/ui/pages/home/widgets/recent_records_list.dart';
+import 'package:bread_road/ui/pages/home/widgets/bread_grade_card.dart';
 import 'package:bread_road/ui/widgets/recommended_bakery_card.dart';
 
 class HomeDashboardView extends StatelessWidget {
@@ -31,21 +32,24 @@ class HomeDashboardView extends StatelessWidget {
         "location": "서울 성북구",
         "rating": 4.8,
         "reviews": 124,
-        "imageUrl": "https://picsum.photos/160/120?random=20",
+        "imageUrl":
+            "https://images.unsplash.com/photo-1550617931-e17a7b70dce2?q=80&w=400&auto=format&fit=crop",
       },
       {
         "name": "밀곳간",
         "location": "서울 성동구",
         "rating": 4.6,
         "reviews": 89,
-        "imageUrl": "https://picsum.photos/160/120?random=21",
+        "imageUrl":
+            "https://images.unsplash.com/photo-1517433670267-08bbd4be890f?q=80&w=400&auto=format&fit=crop",
       },
       {
         "name": "런던 베이글",
         "location": "서울 종로구",
         "rating": 4.9,
         "reviews": 350,
-        "imageUrl": "https://picsum.photos/160/120?random=22",
+        "imageUrl":
+            "https://images.unsplash.com/photo-1608198093002-ad4e005484ec?q=80&w=400&auto=format&fit=crop",
       },
     ];
 
@@ -66,96 +70,107 @@ class HomeDashboardView extends StatelessWidget {
     );
   }
 
+  void _showNotificationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("알림"),
+        content: const Text("아직 알림이 없습니다."),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("확인"),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-    final colorScheme = theme.colorScheme;
-
-    return SafeArea(
+    return SingleChildScrollView(
+      padding: EdgeInsets.zero,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. 고정된 상단 헤더 영역
-          Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFFF5F5F5),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "오늘 먹은 빵 기록하기",
-                    style: textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
+          // 1) 상단 배경화면 (상태바 영역까지 덮음) 및 앱바 영역
+          Stack(
+            children: [
+              RecommendationBanner(data: recommendationData),
+              Positioned(
+                top: MediaQuery.of(context).padding.top + 8,
+                left: 16,
+                right: 16,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // 로고 이미지
+                    Image.asset(
+                      'assets/images/blacklogo.webp',
+                      height: 36,
+                      fit: BoxFit.contain,
                     ),
-                  ),
-                  IconButton(
-                    onPressed: onAddPressed,
-                    icon: const Icon(Icons.add_circle, size: 40),
-                    color: colorScheme.primary,
-                  ),
-                ],
+                    // 알림 아이콘
+                    GestureDetector(
+                      onTap: () => _showNotificationDialog(context),
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.notifications_outlined,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
+            ],
           ),
 
-          // 2. 스크롤 가능한 본문 영역
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 1) 오늘의 빵 추천 영역 (가로 꽉 차게)
-                  RecommendationBanner(data: recommendationData),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 30),
 
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 40),
-                        
-                        // 2) 최근 기록 헤더
-                        SectionHeader(
-                          title: "최근 기록",
-                          onMoreTap: () => onMorePressed(2), // 2는 탭 인덱스
-                        ),
-                        const SizedBox(height: 10),
-                        
-                        // 3) 최근 기록 리스트 (상위 3개)
-                        RecentRecordsList(
-                          records: records,
-                          onRecordTap: onRecordTap,
-                          onFavoriteToggle: onFavoriteToggle,
-                        ),
+                // 빵지순례 등급 카드
+                BreadGradeCard(totalRecords: records.length),
+                const SizedBox(height: 30),
 
-                        const SizedBox(height: 40),
-                        
-                        // 4) 추천 빵집 헤더
-                        SectionHeader(
-                          title: "추천 빵집",
-                          onMoreTap: () => onMorePressed(1), // 1은 탭 인덱스
-                        ),
-                        const SizedBox(height: 10),
-                        
-                        // 5) 추천 빵집 가로 리스트
-                        _buildRecommendedBakeries(context),
-                        
-                        const SizedBox(height: 40),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                // 2) 최근 기록 헤더
+                SectionHeader(
+                  title: "최근 기록",
+                  onMoreTap: () => onMorePressed(2), // 2는 탭 인덱스
+                ),
+                const SizedBox(height: 12),
+
+                // 3) 최근 기록 리스트 (상위 3개)
+                RecentRecordsList(
+                  records: records,
+                  onRecordTap: onRecordTap,
+                  onFavoriteToggle: onFavoriteToggle,
+                ),
+
+                const SizedBox(height: 30),
+
+                // 4) 추천 빵집 헤더
+                SectionHeader(
+                  title: "추천 빵집",
+                  onMoreTap: () => onMorePressed(1), // 1은 탭 인덱스
+                ),
+                const SizedBox(height: 12),
+
+                // 5) 추천 빵집 가로 리스트
+                _buildRecommendedBakeries(context),
+
+                const SizedBox(height: 100), // 바텀 네비게이션 및 FAB 여백
+              ],
             ),
           ),
         ],

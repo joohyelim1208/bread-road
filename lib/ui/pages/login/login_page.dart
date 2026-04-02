@@ -28,16 +28,18 @@ class _LoginPageState extends State<LoginPage> {
         children: [
           const ScrollingBackground(),
           Positioned.fill(
-            child: Container(color: Colors.white.withValues(alpha: 0.7)),
+            child: Container(color: Colors.white.withValues(alpha: 0.8)),
           ),
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: Column(
                 children: [
+                  const Spacer(flex: 4),
+                  const LoginLogoImage(),
                   const Spacer(flex: 3),
-                  const LoginLogoHeader(),
-                  const Spacer(flex: 3),
+                  const LoginWelcomeText(),
+                  const SizedBox(height: 24),
                   LoginButtonGroup(
                     onGoogleTap: _handleGoogleLogin,
                     onKakaoTap: _handleKakaoLogin,

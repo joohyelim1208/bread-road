@@ -34,16 +34,16 @@ class _ScrollingBackgroundState extends State<ScrollingBackground> {
     if (!_scrollController.hasClients || !mounted) return;
 
     final maxScroll = _scrollController.position.maxScrollExtent;
-    const duration = Duration(seconds: 460); // 매우 천천히 이동
+    const duration = Duration(seconds: 500); // 매우 천천히 이동
 
     _scrollController
         .animateTo(maxScroll, duration: duration, curve: Curves.linear)
         .then((_) {
-      if (mounted) {
-        _scrollController.jumpTo(0);
-        _startBackgroundAnimation();
-      }
-    });
+          if (mounted) {
+            _scrollController.jumpTo(0);
+            _startBackgroundAnimation();
+          }
+        });
   }
 
   @override

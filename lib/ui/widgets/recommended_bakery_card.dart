@@ -34,14 +34,15 @@ class RecommendedBakeryCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 빵집 이미지 영역
-              Container(
+              SizedBox(
                 width: double.infinity,
                 height: 110,
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  image: DecorationImage(
-                    image: NetworkImage(bakery["imageUrl"].toString()),
-                    fit: BoxFit.cover,
+                child: Image.network(
+                  bakery["imageUrl"].toString(),
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    color: Colors.grey[200],
+                    child: const Icon(Icons.broken_image, color: Colors.grey),
                   ),
                 ),
               ),

@@ -335,7 +335,7 @@ class _WritePageState extends State<WritePage> {
           decoration: BoxDecoration(
             border: Border(
               bottom: BorderSide(
-                color: isSelected ? colorScheme.primary : Colors.grey[300]!,
+                color: isSelected ? colorScheme.secondary : Colors.grey[300]!,
                 width: 3,
               ),
             ),
@@ -344,7 +344,7 @@ class _WritePageState extends State<WritePage> {
             label,
             style: textTheme.titleLarge?.copyWith(
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              color: isSelected ? colorScheme.primary : Colors.grey[500],
+              color: isSelected ? colorScheme.secondary : Colors.grey[500],
             ),
           ),
         ),
@@ -478,10 +478,10 @@ class _WritePageState extends State<WritePage> {
         child: Container(
           height: 48,
           decoration: BoxDecoration(
-            color: isSelected ? colorScheme.primary : Colors.grey[100],
+            color: isSelected ? colorScheme.secondary : Colors.grey[100],
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
-              color: isSelected ? colorScheme.primary : Colors.grey[300]!,
+              color: isSelected ? colorScheme.secondary : Colors.grey[300]!,
             ),
           ),
           child: Row(

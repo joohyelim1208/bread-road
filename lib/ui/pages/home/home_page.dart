@@ -37,8 +37,9 @@ class _HomePageState extends State<HomePage> {
 
   // 추천 데이터 (추후 Firebase 연동)
   final Map<String, dynamic>? _recommendationData = {
-    "name": "초코 소라빵",
-    "imageUrl": "https://picsum.photos/400/220?random=10",
+    "name": "통곡물 호밀빵",
+    "imageUrl":
+        "https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=400&auto=format&fit=crop",
   };
 
   void _onItemTapped(int index) {
@@ -120,15 +121,27 @@ class _HomePageState extends State<HomePage> {
         currentIndex: _currentIndex,
         onTap: _onItemTapped,
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _navigateToWritePage,
+        elevation: 6,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+        icon: const Icon(Icons.add, color: Colors.white, size: 28),
+        label: Text(
+          "글쓰기",
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
     );
   }
 
   Future<void> _navigateToWritePage() async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const WritePage(),
-      ),
+      MaterialPageRoute(builder: (context) => const WritePage()),
     );
 
     if (result != null) {

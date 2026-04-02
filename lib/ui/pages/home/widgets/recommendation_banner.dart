@@ -3,10 +3,7 @@ import 'package:flutter/material.dart';
 class RecommendationBanner extends StatelessWidget {
   final Map<String, dynamic>? data;
 
-  const RecommendationBanner({
-    super.key,
-    required this.data,
-  });
+  const RecommendationBanner({super.key, required this.data});
 
   @override
   Widget build(BuildContext context) {
@@ -48,12 +45,34 @@ class RecommendationBanner extends StatelessWidget {
 
     return SizedBox(
       width: double.infinity,
-      height: 220,
+      height: 280,
       child: Stack(
         children: [
           Positioned.fill(
             child: imageUrl != null && imageUrl.isNotEmpty
-                ? Image.network(imageUrl, fit: BoxFit.cover)
+                ? Image.network(
+                    imageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      color: Colors.grey[200],
+                      alignment: Alignment.center,
+                      child: const Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.broken_image,
+                            color: Colors.grey,
+                            size: 40,
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            "이미지를 불러올 수 없습니다.",
+                            style: TextStyle(color: Colors.grey, fontSize: 12),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
                 : Container(color: Colors.grey[200]),
           ),
           Positioned.fill(
@@ -63,9 +82,12 @@ class RecommendationBanner extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withValues(alpha: 0.1),
-                    Colors.black.withValues(alpha: 0.6),
+                    Colors.black.withValues(alpha: 0.2),
+                    Colors.transparent,
+                    Colors.transparent,
+                    const Color(0xFFF5F5F5),
                   ],
+                  stops: const [0.0, 0.2, 0.5, 0.9],
                 ),
               ),
             ),
@@ -99,7 +121,7 @@ class RecommendationBanner extends StatelessWidget {
                 Text(
                   name,
                   style: textTheme.headlineSmall?.copyWith(
-                    color: Colors.white,
+                    color: Colors.black87,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

@@ -20,7 +20,7 @@ class SectionHeader extends StatelessWidget {
       children: [
         Text(
           title,
-          style: textTheme.titleMedium?.copyWith(
+          style: textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.bold,
           ),
         ),

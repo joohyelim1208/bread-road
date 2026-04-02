@@ -32,10 +32,10 @@ class CategorySelector extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 20),
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: isSelected ? colorScheme.primary : Colors.grey[100],
+                color: isSelected ? colorScheme.secondary : Colors.grey[100],
                 borderRadius: BorderRadius.circular(22),
                 border: Border.all(
-                  color: isSelected ? colorScheme.primary : Colors.grey[300]!,
+                  color: isSelected ? colorScheme.secondary : Colors.grey[300]!,
                 ),
               ),
               child: Text(

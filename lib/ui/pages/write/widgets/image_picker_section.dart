@@ -103,7 +103,7 @@ class _ImagePickerSectionState extends State<ImagePickerSection> {
                     Icons.camera_alt,
                     color: widget.imagePaths.isEmpty
                         ? Colors.grey[400]
-                        : colorScheme.primary,
+                        : colorScheme.secondary,
                     size: 24,
                   ),
                   const SizedBox(height: 4),
@@ -112,7 +112,7 @@ class _ImagePickerSectionState extends State<ImagePickerSection> {
                     style: textTheme.labelSmall?.copyWith(
                       color: widget.imagePaths.isEmpty
                           ? Colors.grey[400]
-                          : colorScheme.primary,
+                          : colorScheme.secondary,
                       fontWeight: widget.imagePaths.isEmpty
                           ? FontWeight.normal
                           : FontWeight.bold,

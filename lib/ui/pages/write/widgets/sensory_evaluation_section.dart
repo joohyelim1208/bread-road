@@ -124,10 +124,10 @@ class SensoryEvaluationSection extends StatelessWidget {
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: isSelected ? colorScheme.primary : Colors.grey[100],
+                  color: isSelected ? colorScheme.secondary : Colors.grey[100],
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: isSelected ? colorScheme.primary : Colors.grey[300]!,
+                    color: isSelected ? colorScheme.secondary : Colors.grey[300]!,
                   ),
                 ),
                 child: Text(
